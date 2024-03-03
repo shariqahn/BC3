@@ -6,8 +6,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView
+      name: 'grid',
+      component: 'assets/grid.geojson'
     },
     {
       path: '/map',

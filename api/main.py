@@ -7,6 +7,7 @@ import math
 import os
 
 from flask_cors import CORS
+from geojson import MultiPolygon, Feature, Point, FeatureCollection, dump
 
 #####################################
 def patternscaling( Tbar, filename ):
@@ -30,33 +31,42 @@ def patternscaling( Tbar, filename ):
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/greeting")
-def greeting():
-    return {"greeting": "Hello from Flask!"}
-
 @app.route('/temperature')
 def get_temperature():
     filename = 'PatternScalingCoefficients_ssp370r1i1p1f1-ssp585r1i1p1f1_Regridded.nc'
     tbar              = float(request.args.get('tbar', 0))
     flat, flon, ftemp = patternscaling( tbar, filename )
-    # print(flat, flon, (ftemp[0]))
-    return {
-        "lats": flat.tolist(),
-        "lons": flon.tolist(),
-        "temps": ftemp.tolist()
-        }
+    # print(flat, flon)
+
+    grid = []
+    for i in range(len(flon)):
+        for j in range(len(flat)):
+            # grid.append(([(flon[i]-.5, flat[j]-.5), (flon[i]-.5, flat[j]+.5), (flon[i]+.5, flat[j]+.5), (flon[i]+.5, flat[j]-.5), (flon[i]-.5, flat[j]-.5)],))
+            # print(flon[i], flat[j], ftemp[j][i])
+            property = {'temperature': str(ftemp[j][i])}
+            # print(property)
+            feature = Feature(geometry=Point((flon[i], flat[j])), properties=property)
+            # feature['properties']['temperature'] = ftemp[j][i]
+            # print(feature)
+            grid.append(feature)
+    grid = FeatureCollection(grid)
+    # print(grid)
+    with open('grid.geojson', 'w') as f:
+        dump(grid, f)
+    # print(np.min(ftemp))
+    return { "minTemperature": str(np.min(ftemp)), "maxTemperature": str(np.max(ftemp))}
 
 @app.route('/patternscaling')
 def calculate():
     try:
         filename = 'PatternScalingCoefficients_ssp370r1i1p1f1-ssp585r1i1p1f1_Regridded.nc'
-        tbar              = float(request.args.get('tbar', 0))
+        tbar = float(request.args.get('tbar', 0))
         flat, flon, ftemp = patternscaling( tbar, filename )
         # Calculate global average from pattern scaling temperature map 
         # -- Should match the Tbar input (both if it is anomaly or absolute temperature)
-        coslat        = np.cos( np.deg2rad( flat ) )
+        coslat = np.cos( np.deg2rad( flat ) )
         weight_factor = coslat / coslat.mean() 
-        zonalavg      = np.mean( ftemp, axis=1 )
+        zonalavg = np.mean( ftemp, axis=1 )
 
         plt.switch_backend('Agg')
         # Set monospaced font properties using rcParams
@@ -77,5 +87,7 @@ def calculate():
     except ValueError:
         return 'Please enter valid numbers in the URL.'
 
-if __name__ == '__main__':
-    app.run( debug=True )
+# if __name__ == '__main__':
+    # app.run( debug=True )
+
+    # get_geojson()
