@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import math
 import os
+import json
 
 from flask_cors import CORS
-from geojson import MultiPolygon, Feature, Point, FeatureCollection, dump
+from geojson import Polygon, Feature, Point, FeatureCollection, dump
 
 #####################################
 def patternscaling( Tbar, filename ):
@@ -39,19 +40,30 @@ def get_temperature():
     # print(flat, flon)
 
     grid = []
+    # i = 0
+    # j = 0
+    # polygon = Polygon([(flon[i]-.5, flat[j]-.5), (flon[i]-.5, flat[j]+.5), (flon[i]+.5, flat[j]+.5), (flon[i]+.5, flat[j]-.5), (flon[i]-.5, flat[j]-.5)])
+    # property = {'temperature': np.float64(ftemp[j][i])}
+    # # feature = Feature(geometry=Point((flon[i], flat[j])), properties=property)
+    # feature = Feature(geometry=polygon, properties=property)
+    # grid.append(feature)
+
     for i in range(len(flon)):
         for j in range(len(flat)):
-            # grid.append(([(flon[i]-.5, flat[j]-.5), (flon[i]-.5, flat[j]+.5), (flon[i]+.5, flat[j]+.5), (flon[i]+.5, flat[j]-.5), (flon[i]-.5, flat[j]-.5)],))
             # print(flon[i], flat[j], ftemp[j][i])
-            property = {'temperature': str(ftemp[j][i])}
-            # print(property)
-            feature = Feature(geometry=Point((flon[i], flat[j])), properties=property)
-            # feature['properties']['temperature'] = ftemp[j][i]
-            # print(feature)
+            polygon = Polygon(([(flon[i]-.5, flat[j]-.5), (flon[i]-.5, flat[j]+.5), (flon[i]+.5, flat[j]+.5), (flon[i]+.5, flat[j]-.5), (flon[i]-.5, flat[j]-.5)],))
+            property = {'temperature': np.float64(ftemp[j][i])}
+            # feature = Feature(geometry=Point((flon[i], flat[j])), properties=property)
+            feature = Feature(geometry=polygon, properties=property)
             grid.append(feature)
+            # if len(grid) > 1000:
+            #     break
+
+        # if len(grid) > 1000:
+        #     break
     grid = FeatureCollection(grid)
     # print(grid)
-    with open('grid.geojson', 'w') as f:
+    with open('grid.json', 'w') as f:
         dump(grid, f)
     # print(np.min(ftemp))
     return { "minTemperature": str(np.min(ftemp)), "maxTemperature": str(np.max(ftemp))}

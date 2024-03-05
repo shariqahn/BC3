@@ -3,9 +3,8 @@
 // import { RouterLink, RouterView } from 'vue-router'
 // import HelloWorld from './components/HelloWorld.vue'
 import axios from 'axios';
-import { Loader } from "@googlemaps/js-api-loader"
 import chroma from "chroma-js"
-import { toHandlers } from 'vue';
+import { setBlockTracking, toHandlers } from 'vue';
 import grid from '../assets/grid.json';
 import mapboxgl from "mapbox-gl";
 import "../../node_modules/mapbox-gl/dist/mapbox-gl.css"
@@ -16,14 +15,10 @@ export default {
   },
   data() {
       return {
-          // greeting: 'Hello, Vue!',
           temperatures: '',
-          // flaskGreeting: '',
           // Map: undefined,
-          // AdvancedMarkerElement: undefined
           loaded: false,
-          squares: [],
-          grid: grid
+          // grid: grid
       }
   },
   methods: {
@@ -34,8 +29,9 @@ export default {
       container: 'map', // HTML container id
       projection: 'mercator',
       style: 'mapbox://styles/mapbox/streets-v12', // style URL
-      center: [-21.92661562, 64.14356426], // starting position as [lng, lat]
-      zoom: 1
+      // center: [-21.92661562, 64.14356426], // starting position as [lng, lat]
+      center: [-90, 0], // starting position
+      zoom: 2
       });
 
       const minTemperature = Number(this.temperatures['minTemperature'])
@@ -45,67 +41,106 @@ export default {
       map.on('load', () => {
         map.addSource('temperature', {
           type: 'geojson',
-          data: grid
+          data: grid,
         });
-        // add heatmap layer here
+
         map.addLayer(
-        {
-          id: 'trees-heat',
-          type: 'heatmap',
-          source: 'temperature',
-          maxzoom: 15,
-          paint: {
-            'heatmap-weight': {
-              property: 'temperature',
-              type: 'exponential',
-              stops: [
-                [minTemperature, 0],
-                [maxTemperature, 1]
-              ]
+            {
+                'id': 'temperature-map',
+                'source': 'temperature',
+                // 'source-layer': 'state_county_population_2014_cen',
+                // 'maxzoom': zoomThreshold,
+                'type': 'fill',
+                // only include features for which the "isState"
+                // property is "true"
+                // 'filter': ['==', 'isState', true],
+                'paint': {
+                    'fill-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'temperature'],
+                        minTemperature,
+                        'yellow',
+                        // 500000,
+                        // '#EED322',
+                        // 750000,
+                        // '#E6B71E',
+                        // 1000000,
+                        // '#DA9C20',
+                        // 2500000,
+                        // '#CA8323',
+                        // 5000000,
+                        // '#B86B25',
+                        // 7500000,
+                        // '#A25626',
+                        // 10000000,
+                        // '#8B4225',
+                        maxTemperature,
+                        'red'
+                    ],
+                    'fill-opacity': 0.75
+                }
             },
-            // increase intensity as zoom level increases
-            'heatmap-intensity': {
-              stops: [
-                [11, 1],
-                [15, 3]
-              ]
-            },
-            // assign color values be applied to points depending on their density
-            'heatmap-color': [
-              'interpolate',
-              ['linear'],
-              ['heatmap-density'],
-              0,
-              'rgba(236,222,239,0)',
-              0.2,
-              'rgb(208,209,230)',
-              0.4,
-              'rgb(166,189,219)',
-              0.6,
-              'rgb(103,169,207)',
-              0.8,
-              'rgb(28,144,153)'
-            ],
-            // increase radius as zoom increases
-            'heatmap-radius': {
-              stops: [
-                [11, 15],
-                [15, 20]
-              ]
-            },
-            // // decrease opacity to transition into the circle layer
-            // 'heatmap-opacity': {
-            //   default: 1,
-            //   stops: [
-            //     [14, 1],
-            //     [15, 0]
-            //   ]
-            // }
-          }
-        },
-        'waterway-label'
-      );
-        // add circle layer here
+        );
+
+        // add heatmap layer here
+      //   map.addLayer(
+      //   {
+      //     id: 'trees-heat',
+      //     type: 'heatmap',
+      //     source: 'temperature',
+      //     maxzoom: 15,
+      //     paint: {
+      //       'heatmap-weight': {
+      //         property: 'temperature',
+      //         type: 'exponential',
+      //         stops: [
+      //           [minTemperature, 0],
+      //           [maxTemperature, 1]
+      //         ]
+      //       },
+      //       // increase intensity as zoom level increases
+      //       'heatmap-intensity': {
+      //         stops: [
+      //           [11, 1],
+      //           [15, 3]
+      //         ]
+      //       },
+      //       // assign color values be applied to points depending on their density
+      //       'heatmap-color': [
+      //         'interpolate',
+      //         ['linear'],
+      //         ['heatmap-density'],
+      //         0,
+      //         'rgba(236,222,239,0)',
+      //         0.2,
+      //         'rgb(208,209,230)',
+      //         0.4,
+      //         'rgb(166,189,219)',
+      //         0.6,
+      //         'rgb(103,169,207)',
+      //         0.8,
+      //         'rgb(28,144,153)'
+      //       ],
+      //       // increase radius as zoom increases
+      //       'heatmap-radius': {
+      //         stops: [
+      //           [11, 15],
+      //           [15, 20]
+      //         ]
+      //       },
+      //       // // decrease opacity to transition into the circle layer
+      //       // 'heatmap-opacity': {
+      //       //   default: 1,
+      //       //   stops: [
+      //       //     [14, 1],
+      //       //     [15, 0]
+      //       //   ]
+      //       // }
+      //     }
+      //   },
+      //   'waterway-label'
+      // );
       });
     },
     getTemperatures() {

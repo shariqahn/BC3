@@ -4,10 +4,15 @@ import HomeView from '../views/HomeView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // {
+    //   path: '/',
+    //   name: 'grid',
+    //   component: 'assets/grid.geojson'
+    // },
     {
       path: '/',
-      name: 'grid',
-      component: 'assets/grid.geojson'
+      name: 'home',
+      component: HomeView
     },
     {
       path: '/map',
