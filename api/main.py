@@ -4,11 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import math
-import os
-import json
 
-from flask_cors import CORS
-from geojson import Polygon, Feature, Point, FeatureCollection, dump
+from flask_cors import CORS\
 
 #####################################
 def patternscaling( Tbar, filename ):
@@ -37,48 +34,26 @@ def get_temperature():
     filename = 'PatternScalingCoefficients_ssp370r1i1p1f1-ssp585r1i1p1f1_Regridded.nc'
     tbar              = float(request.args.get('tbar', 0))
     flat, flon, ftemp = patternscaling( tbar, filename )
-    # print(flat, flon)
 
-    grid = []
-    # i = 0
-    # j = 0
-    # polygon = Polygon([(flon[i]-.5, flat[j]-.5), (flon[i]-.5, flat[j]+.5), (flon[i]+.5, flat[j]+.5), (flon[i]+.5, flat[j]-.5), (flon[i]-.5, flat[j]-.5)])
-    # property = {'temperature': np.float64(ftemp[j][i])}
-    # # feature = Feature(geometry=Point((flon[i], flat[j])), properties=property)
-    # feature = Feature(geometry=polygon, properties=property)
-    # grid.append(feature)
-
-    for i in range(len(flon)):
-        for j in range(len(flat)):
-            # print(flon[i], flat[j], ftemp[j][i])
-            polygon = Polygon(([(flon[i]-.5, flat[j]-.5), (flon[i]-.5, flat[j]+.5), (flon[i]+.5, flat[j]+.5), (flon[i]+.5, flat[j]-.5), (flon[i]-.5, flat[j]-.5)],))
-            property = {'temperature': np.float64(ftemp[j][i])}
-            # feature = Feature(geometry=Point((flon[i], flat[j])), properties=property)
-            feature = Feature(geometry=polygon, properties=property)
-            grid.append(feature)
-            # if len(grid) > 1000:
-            #     break
-
-        # if len(grid) > 1000:
-        #     break
-    grid = FeatureCollection(grid)
-    # print(grid)
-    with open('grid.json', 'w') as f:
-        dump(grid, f)
-    # print(np.min(ftemp))
-    return { "minTemperature": str(np.min(ftemp)), "maxTemperature": str(np.max(ftemp))}
+    return {
+        "lats": flat.tolist(),
+        "lons": flon.tolist(),
+        "temps": ftemp.tolist(),
+        "minTemperature": str(np.min(ftemp)), 
+        "maxTemperature": str(np.max(ftemp))
+    }
 
 @app.route('/patternscaling')
 def calculate():
     try:
         filename = 'PatternScalingCoefficients_ssp370r1i1p1f1-ssp585r1i1p1f1_Regridded.nc'
-        tbar = float(request.args.get('tbar', 0))
+        tbar              = float(request.args.get('tbar', 0))
         flat, flon, ftemp = patternscaling( tbar, filename )
         # Calculate global average from pattern scaling temperature map 
         # -- Should match the Tbar input (both if it is anomaly or absolute temperature)
-        coslat = np.cos( np.deg2rad( flat ) )
+        coslat        = np.cos( np.deg2rad( flat ) )
         weight_factor = coslat / coslat.mean() 
-        zonalavg = np.mean( ftemp, axis=1 )
+        zonalavg      = np.mean( ftemp, axis=1 )
 
         plt.switch_backend('Agg')
         # Set monospaced font properties using rcParams
@@ -98,8 +73,3 @@ def calculate():
 
     except ValueError:
         return 'Please enter valid numbers in the URL.'
-
-# if __name__ == '__main__':
-    # app.run( debug=True )
-
-    # get_geojson()

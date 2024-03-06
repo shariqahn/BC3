@@ -5,7 +5,7 @@
 import axios from 'axios';
 import chroma from "chroma-js"
 import { setBlockTracking, toHandlers } from 'vue';
-import grid from '../assets/grid.json';
+import grid from '../assets/shortgrid.json';
 import mapboxgl from "mapbox-gl";
 import "../../node_modules/mapbox-gl/dist/mapbox-gl.css"
 
@@ -15,14 +15,45 @@ export default {
   },
   data() {
       return {
-          temperatures: '',
+          temperatures: [],
+          latitudes: [],
+          longitudes: [],
+          minTemperature: null,
+          maxTemperature: null,
           // Map: undefined,
           loaded: false,
-          // grid: grid
+          // grid: grid,
+          data: {}
       }
   },
   methods: {
+    getGeoJSON(){
+      this.data = {
+        "type":"FeatureCollection",
+        "features":[]
+      }
+
+      this.temperatures.forEach((lats, i) => {
+        lats.forEach((temperature, j) => {
+          const latitude = this.latitudes[i]
+          const longitude = this.longitudes[j]
+
+          const polygon = [[[longitude-.5, latitude-.5], [longitude-.5, latitude+.5], [longitude+.5, latitude+.5], [longitude+.5, latitude-.5], [longitude-.5, latitude-.5]]]
+          const feature = {
+            "type": "Feature",
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": polygon
+            },
+            "properties": {'temperature': temperature}
+          }
+          this.data.features.push(feature)
+        })
+      })
+      // this.data.features = this.data.features.slice(20000,24000)
+    },
     initMap() {
+      console.log('data',this.data)
       mapboxgl.accessToken = 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q';
  
       const map = new mapboxgl.Map({
@@ -30,18 +61,32 @@ export default {
       projection: 'mercator',
       style: 'mapbox://styles/mapbox/streets-v12', // style URL
       // center: [-21.92661562, 64.14356426], // starting position as [lng, lat]
-      center: [-90, 0], // starting position
-      zoom: 2
+      // center: [300, -30], // starting position
+      zoom: 4
       });
 
-      const minTemperature = Number(this.temperatures['minTemperature'])
-      const maxTemperature = Number(this.temperatures['maxTemperature'])
-      console.log(minTemperature, maxTemperature)
+      // const minTemperature = Number(this.temperatures['minTemperature'])
+      // const maxTemperature = Number(this.temperatures['maxTemperature'])
+      console.log(this.minTemperature, this.maxTemperature)
+      // var minTemperature, maxTemperature;
+      // this.temperatures.temps.forEach(function(itm) {
+      //   const min = Math.min(...itm)
+      //   const max = Math.max(...itm)
+      //   minTemperature = (minTemperature == undefined || min<minTemperature) ? min : minTemperature;
+      //   maxTemperature = (maxTemperature == undefined || max>maxTemperature) ? max : maxTemperature;
+      // });
 
       map.on('load', () => {
+        // const layers = map.getStyle().layers;
+        // for (const layer of layers) {
+        //     if (layer.type === 'line') {
+        //         console.log(layer)
+        //     }
+        // }
+
         map.addSource('temperature', {
           type: 'geojson',
-          data: grid,
+          data: this.data,
         });
 
         map.addLayer(
@@ -59,102 +104,42 @@ export default {
                         'interpolate',
                         ['linear'],
                         ['get', 'temperature'],
-                        minTemperature,
+                        0,
+                        'white',
+                        5,
                         'yellow',
-                        // 500000,
-                        // '#EED322',
-                        // 750000,
-                        // '#E6B71E',
-                        // 1000000,
-                        // '#DA9C20',
-                        // 2500000,
-                        // '#CA8323',
-                        // 5000000,
-                        // '#B86B25',
-                        // 7500000,
-                        // '#A25626',
-                        // 10000000,
-                        // '#8B4225',
-                        maxTemperature,
+                        10,
+                        'orange',
+                        15,
                         'red'
                     ],
-                    'fill-opacity': 0.75
+                    // 'fill-opacity': 0.75,
                 }
             },
+            // todo play w layers more
+        "admin-1-boundary",
+        // 'pitch-outline'
+        // "admin-0-boundary-bg"
         );
-
-        // add heatmap layer here
-      //   map.addLayer(
-      //   {
-      //     id: 'trees-heat',
-      //     type: 'heatmap',
-      //     source: 'temperature',
-      //     maxzoom: 15,
-      //     paint: {
-      //       'heatmap-weight': {
-      //         property: 'temperature',
-      //         type: 'exponential',
-      //         stops: [
-      //           [minTemperature, 0],
-      //           [maxTemperature, 1]
-      //         ]
-      //       },
-      //       // increase intensity as zoom level increases
-      //       'heatmap-intensity': {
-      //         stops: [
-      //           [11, 1],
-      //           [15, 3]
-      //         ]
-      //       },
-      //       // assign color values be applied to points depending on their density
-      //       'heatmap-color': [
-      //         'interpolate',
-      //         ['linear'],
-      //         ['heatmap-density'],
-      //         0,
-      //         'rgba(236,222,239,0)',
-      //         0.2,
-      //         'rgb(208,209,230)',
-      //         0.4,
-      //         'rgb(166,189,219)',
-      //         0.6,
-      //         'rgb(103,169,207)',
-      //         0.8,
-      //         'rgb(28,144,153)'
-      //       ],
-      //       // increase radius as zoom increases
-      //       'heatmap-radius': {
-      //         stops: [
-      //           [11, 15],
-      //           [15, 20]
-      //         ]
-      //       },
-      //       // // decrease opacity to transition into the circle layer
-      //       // 'heatmap-opacity': {
-      //       //   default: 1,
-      //       //   stops: [
-      //       //     [14, 1],
-      //       //     [15, 0]
-      //       //   ]
-      //       // }
-      //     }
-      //   },
-      //   'waterway-label'
-      // );
       });
     },
     getTemperatures() {
       const tbar = this.$route.query.tbar
+      console.log(tbar)
       const path = 'http://localhost:5000/temperature?tbar=' + tbar;
-      // console.log(path)
       axios.get(path)
         .then((res) => {
           // console.log(res)
-          this.temperatures = res.data;
-          // console.log(!this.loaded);
+          // todo structure data
+          this.temperatures = res.data.temps;
+          this.latitudes = res.data.lats;
+          this.longitudes = res.data.lons;
+          // todo calc in js
+          this.minTemperature = Number(res.data.minTemperature)
+          this.maxTemperature =  Number(res.data.maxTemperature)
           // (!this.loaded) ? this.initMap() : this.refreshMap()
          
-
+          this.getGeoJSON();
           this.initMap();
         })
         .catch((error) => {
@@ -180,26 +165,18 @@ export default {
 </script>
 
 <template>
-  <!-- <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header> -->
-  <!-- <div id="app">
-    <p>{{ greeting }}</p>
-    <p>{{ flaskGreeting }}</p>
-  </div> -->
-  <!--The div element for the map -->
   <div id="map"></div>
-  <!-- <div id="legend"><h3>Legend</h3></div> -->
-  <!-- <RouterView /> -->
+  <div class='my-legend'>
+  <div class='legend-title'>Temperature Anomaly (K)</div>
+  <div class='legend-scale'>
+    <ul class='legend-labels'>
+      <li><span style='background:white;'></span>0</li>
+      <li><span style='background:yellow;'></span>5</li>
+      <li><span style='background:orange;'></span>10</li>
+      <li><span style='background:red;'></span>15</li>
+    </ul>
+  </div>
+  </div>
 </template>
 
 <style scoped>
@@ -213,18 +190,54 @@ export default {
 
   width: 100%;
   height: 100%;
+
+  z-index: 1;
 }
 
-#legend {
-  font-family: Arial, sans-serif;
-  background: #fff;
-  padding: 10px;
-  margin: 10px;
-  border: 3px solid #000;
-}
+.my-legend .legend-title {
+  text-align: left;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 90%;
+  }
+.my-legend .legend-scale ul {
+  margin: 0;
+  padding: 0;
+  float: left;
+  list-style: none;
+  }
+.my-legend .legend-scale ul li {
+  display: block;
+  float: left;
+  width: 50px;
+  margin-bottom: 6px;
+  text-align: center;
+  font-size: 80%;
+  list-style: none;
+  }
+.my-legend ul.legend-labels li span {
+  display: block;
+  float: left;
+  height: 15px;
+  width: 50px;
+  }
+.my-legend .legend-source {
+  font-size: 70%;
+  color: #999;
+  clear: both;
+  }
+.my-legend a {
+  color: #777;
+  }
 
-#legend h3 {
-  margin-top: 0;
+.my-legend {
+  z-index: 1;
+  bottom: 30px;
+  right: 20px;
+  position: absolute;
+  background-color: white;
+  padding-right: 5px;
+  padding-left: 5px;
 }
 
 </style>
