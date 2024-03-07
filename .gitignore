@@ -1,2 +1,4 @@
 node_modules
 *.nc
+api/__pycache__/
+*.py[cod]
