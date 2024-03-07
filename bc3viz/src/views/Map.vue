@@ -1,19 +1,10 @@
-<!-- <script setup> -->
 <script>
-// import { RouterLink, RouterView } from 'vue-router'
-// import HelloWorld from './components/HelloWorld.vue'
 import axios from 'axios';
-import chroma from "chroma-js"
-import { setBlockTracking, toHandlers } from 'vue';
-import grid from '../assets/shortgrid.json';
 import mapboxgl from "mapbox-gl";
 import "../../node_modules/mapbox-gl/dist/mapbox-gl.css"
-import {MapboxSearchBox } from "@mapbox/search-js-web"
+import { MapboxSearchBox } from "@mapbox/search-js-web"
 
 export default {
-  components: {
-      // Logo
-  },
   data() {
       return {
           temperatures: [],
@@ -21,9 +12,7 @@ export default {
           longitudes: [],
           minTemperature: null,
           maxTemperature: null,
-          // Map: undefined,
           loaded: false,
-          // grid: grid,
           data: {},
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q'
       }
@@ -52,24 +41,19 @@ export default {
           this.data.features.push(feature)
         })
       })
-      // this.data.features = this.data.features.slice(20000,24000)
     },
     initMap() {
-      console.log('data',this.data)
       mapboxgl.accessToken = this.accessToken;
  
       const map = new mapboxgl.Map({
-      container: 'map', // HTML container id
+      container: 'map', 
       projection: 'mercator',
-      style: 'mapbox://styles/mapbox/streets-v12', // style URL
-      // center: [-21.92661562, 64.14356426], // starting position as [lng, lat]
-      // center: [300, -30], // starting position
-      zoom: 4
+      style: 'mapbox://styles/mapbox/streets-v12', 
+      zoom: 4,
       });
 
       // const minTemperature = Number(this.temperatures['minTemperature'])
       // const maxTemperature = Number(this.temperatures['maxTemperature'])
-      console.log(this.minTemperature, this.maxTemperature)
       // var minTemperature, maxTemperature;
       // this.temperatures.temps.forEach(function(itm) {
       //   const min = Math.min(...itm)
@@ -79,12 +63,12 @@ export default {
       // });
 
       map.on('load', () => {
-        const layers = map.getStyle().layers;
-        for (const layer of layers) {
-            if ((layer.type === 'line') || (layer.type === 'symbol')) {
-                console.log(layer)
-            } 
-        }
+        // const layers = map.getStyle().layers;
+        // for (const layer of layers) {
+        //     if ((layer.type === 'line') || (layer.type === 'symbol')) {
+        //         console.log(layer)
+        //     } 
+        // }
 
         map.addSource('temperature', {
           type: 'geojson',
@@ -92,39 +76,32 @@ export default {
         });
 
         map.addLayer(
-            {
-                'id': 'temperature-map',
-                'source': 'temperature',
-                // 'source-layer': 'state_county_population_2014_cen',
-                // 'maxzoom': zoomThreshold,
-                'type': 'fill',
-                // only include features for which the "isState"
-                // property is "true"
-                // 'filter': ['==', 'isState', true],
-                'paint': {
-                    'fill-color': [
-                        'interpolate',
-                        ['linear'],
-                        ['get', 'temperature'],
-                        0,
-                        '#ffffb2',
-                        3,
-                        '#fed976',
-                        6,
-                        '#feb24c',
-                        9,
-                        '#fd8d3c',
-                        12,
-                        '#f03b20',
-                        15,
-                        '#bd0026'
-                    ],
-                    // 'fill-opacity': 0.75,
-                }
-            },
-            // todo play w layers more
-        "admin-1-boundary-bg",
-        // 'pitch-outline'
+          {
+              'id': 'temperature-map',
+              'source': 'temperature',
+              'type': 'fill',
+              'paint': {
+                  'fill-color': [
+                      'interpolate',
+                      ['linear'],
+                      ['get', 'temperature'],
+                      0,
+                      '#ffffb2',
+                      3,
+                      '#fed976',
+                      6,
+                      '#feb24c',
+                      9,
+                      '#fd8d3c',
+                      12,
+                      '#f03b20',
+                      15,
+                      '#bd0026'
+                  ],
+              }
+          },
+          // todo play w layers more
+          "admin-1-boundary-bg",
         );
 
         const search = new MapboxSearchBox();
@@ -134,7 +111,6 @@ export default {
     },
     getTemperatures() {
       const tbar = this.$route.query.tbar
-      console.log(tbar)
       const path = 'http://localhost:5000/temperature?tbar=' + tbar;
       axios.get(path)
         .then((res) => {
@@ -157,14 +133,11 @@ export default {
     },
   },
   created() {
-    // Map = await google.maps.importLibrary("maps");
-    // AdvancedMarkerElement = await google.maps.importLibrary("marker");
-    // this.getGreeting(); 
     this.getTemperatures();
     this.$watch(
       () => this.$route.query,
       (toParams, previousParams) => {
-        // react to route changes...
+        // react to route changes
         this.getTemperatures();
       }
     )
