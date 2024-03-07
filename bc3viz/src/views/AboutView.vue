@@ -8,6 +8,7 @@ import { setBlockTracking, toHandlers } from 'vue';
 import grid from '../assets/shortgrid.json';
 import mapboxgl from "mapbox-gl";
 import "../../node_modules/mapbox-gl/dist/mapbox-gl.css"
+import {MapboxSearchBox } from "@mapbox/search-js-web"
 
 export default {
   components: {
@@ -23,7 +24,8 @@ export default {
           // Map: undefined,
           loaded: false,
           // grid: grid,
-          data: {}
+          data: {},
+          accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q'
       }
   },
   methods: {
@@ -54,7 +56,7 @@ export default {
     },
     initMap() {
       console.log('data',this.data)
-      mapboxgl.accessToken = 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q';
+      mapboxgl.accessToken = this.accessToken;
  
       const map = new mapboxgl.Map({
       container: 'map', // HTML container id
@@ -77,12 +79,12 @@ export default {
       // });
 
       map.on('load', () => {
-        // const layers = map.getStyle().layers;
-        // for (const layer of layers) {
-        //     if (layer.type === 'line') {
-        //         console.log(layer)
-        //     }
-        // }
+        const layers = map.getStyle().layers;
+        for (const layer of layers) {
+            if ((layer.type === 'line') || (layer.type === 'symbol')) {
+                console.log(layer)
+            } 
+        }
 
         map.addSource('temperature', {
           type: 'geojson',
@@ -105,22 +107,29 @@ export default {
                         ['linear'],
                         ['get', 'temperature'],
                         0,
-                        'white',
-                        5,
-                        'yellow',
-                        10,
-                        'orange',
+                        '#ffffb2',
+                        3,
+                        '#fed976',
+                        6,
+                        '#feb24c',
+                        9,
+                        '#fd8d3c',
+                        12,
+                        '#f03b20',
                         15,
-                        'red'
+                        '#bd0026'
                     ],
                     // 'fill-opacity': 0.75,
                 }
             },
             // todo play w layers more
-        "admin-1-boundary",
+        "admin-1-boundary-bg",
         // 'pitch-outline'
-        // "admin-0-boundary-bg"
         );
+
+        const search = new MapboxSearchBox();
+        search.accessToken = this.accessToken;
+        map.addControl(search);
       });
     },
     getTemperatures() {
@@ -170,10 +179,12 @@ export default {
   <div class='legend-title'>Temperature Anomaly (K)</div>
   <div class='legend-scale'>
     <ul class='legend-labels'>
-      <li><span style='background:white;'></span>0</li>
-      <li><span style='background:yellow;'></span>5</li>
-      <li><span style='background:orange;'></span>10</li>
-      <li><span style='background:red;'></span>15</li>
+      <li><span style='background:#ffffb2;'></span>0</li>
+      <li><span style='background:#fed976;'></span>3</li>
+      <li><span style='background:#feb24c;'></span>6</li>
+      <li><span style='background:#fd8d3c;'></span>9</li>
+      <li><span style='background:#f03b20;'></span>12</li>
+      <li><span style='background:#bd0026;'></span>15+</li>
     </ul>
   </div>
   </div>
@@ -232,12 +243,16 @@ export default {
 
 .my-legend {
   z-index: 1;
-  bottom: 30px;
-  right: 20px;
+  bottom: 35px;
+  right: 15px;
   position: absolute;
   background-color: white;
-  padding-right: 5px;
-  padding-left: 5px;
+  padding-right: 7px;
+  padding-left: 7px;
+  border-color: grey;
+  border-style: solid;
+  border-radius: 5px;
+  border-width: 1px;
 }
 
 </style>
