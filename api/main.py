@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 
-from flask_cors import CORS\
+from flask_cors import CORS
 
 #####################################
 def patternscaling( Tbar, filename ):
