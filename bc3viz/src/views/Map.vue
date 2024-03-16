@@ -50,6 +50,7 @@ export default {
       projection: 'mercator',
       style: 'mapbox://styles/mapbox/streets-v12', 
       zoom: 4,
+      maxZoom: 7
       });
 
       // const minTemperature = Number(this.temperatures['minTemperature'])
