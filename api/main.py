@@ -16,11 +16,11 @@ def patternscaling( Tbar, filename ):
     alpha      = n4obj.variables['slope']
     beta       = n4obj.variables['intercept']
     if Tbar < 100:
-      # User likely passed temperature anomaly
-      pstemp = alpha[:]*Tbar # Temperature Anomaly [K]
+        # User likely passed temperature anomaly
+        pstemp = alpha[:]*Tbar # Temperature Anomaly [K]
     else: 
-      # User likely passed absolute temperatre
-      pstemp = alpha[:]*Tbar + beta[:] # Absolute Temperature [K]
+        # User likely passed absolute temperatre
+        pstemp = alpha[:]*Tbar + beta[:] # Absolute Temperature [K]
     # Return 
     return lat[:], lon[:], pstemp[:]
 #####################################
@@ -44,3 +44,9 @@ def get_temperature():
     }
     # except:
     #     return 'Please enter valid numbers in the URL.'
+
+
+
+
+if __name__ == '__main__':  
+    app.run(debug = True)

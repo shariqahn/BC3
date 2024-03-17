@@ -1,4 +1,5 @@
 node_modules
+
 api/__pycache__
-*.py[cod]
 api/psenv
+*.py[cod]

@@ -10,14 +10,21 @@ export default {
           temperatures: [],
           latitudes: [],
           longitudes: [],
-          minTemperature: null,
-          maxTemperature: null,
           loaded: false,
           data: {},
-          accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q'
+          accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
+          colorScale: ['white', '#ffff00', '#ffbd2f', '#ff8265', '#f55f8d', '#ab579d', '#58508d'],
+          logBase: 2
       }
   },
   methods: {
+    // createLegend(logBase) {
+    //   <ul>
+    //     <li v-for="n in 6">
+    //       <span style='background:this.colorScale[n];'></span>logBase**n
+    //     </li>
+    //   </ul>
+    // },
     getGeoJSON(){
       this.data = {
         "type":"FeatureCollection",
@@ -87,17 +94,17 @@ export default {
                       ['linear'],
                       ['get', 'temperature'],
                       0,
-                      '#ffffb2',
-                      3,
-                      '#fed976',
-                      6,
-                      '#feb24c',
-                      9,
-                      '#fd8d3c',
-                      12,
-                      '#f03b20',
-                      15,
-                      '#bd0026'
+                      this.colorScale[0],
+                      this.logBase,
+                      this.colorScale[1],
+                      this.logBase**2,
+                      this.colorScale[2],
+                      this.logBase**3,
+                      this.colorScale[3],
+                      this.logBase**4,
+                      this.colorScale[4],
+                      this.logBase**5,
+                      this.colorScale[5]
                   ],
               }
           },
@@ -120,11 +127,6 @@ export default {
           this.temperatures = res.data.temps;
           this.latitudes = res.data.lats;
           this.longitudes = res.data.lons;
-          // todo calc in js
-          this.minTemperature = Number(res.data.minTemperature)
-          this.maxTemperature =  Number(res.data.maxTemperature)
-          // (!this.loaded) ? this.initMap() : this.refreshMap()
-         
           this.getGeoJSON();
           this.initMap();
         })
@@ -138,7 +140,7 @@ export default {
     this.$watch(
       () => this.$route.query,
       (toParams, previousParams) => {
-        // react to route changes
+        // todo react to route changes
         this.getTemperatures();
       }
     )
@@ -149,16 +151,15 @@ export default {
 
 <template>
   <div id="map"></div>
+  <!-- todo move to new component -->
   <div class='my-legend'>
-  <div class='legend-title'>Temperature Anomaly (K)</div>
+  <div class='legend-title'>Temperature Increase (C)</div>
   <div class='legend-scale'>
     <ul class='legend-labels'>
-      <li><span style='background:#ffffb2;'></span>0</li>
-      <li><span style='background:#fed976;'></span>3</li>
-      <li><span style='background:#feb24c;'></span>6</li>
-      <li><span style='background:#fd8d3c;'></span>9</li>
-      <li><span style='background:#f03b20;'></span>12</li>
-      <li><span style='background:#bd0026;'></span>15+</li>
+      <li><span :style="{background: colorScale[0]}"></span>0</li>
+      <li v-for="n in 6">
+        <span :style="{background: colorScale[n]}"></span>{{logBase**(n-1)}}
+      </li>
     </ul>
   </div>
   </div>
