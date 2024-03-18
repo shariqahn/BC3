@@ -13,18 +13,11 @@ export default {
           loaded: false,
           data: {},
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
-          colorScale: ['white', '#ffff00', '#ffbd2f', '#ff8265', '#f55f8d', '#ab579d', '#58508d'],
+          colorScale: ['white', '#ffff6b', '#ffc55f', '#ff9175', '#e76c8d', '#a65b99', '#58508d'],
           logBase: 2
       }
   },
   methods: {
-    // createLegend(logBase) {
-    //   <ul>
-    //     <li v-for="n in 6">
-    //       <span style='background:this.colorScale[n];'></span>logBase**n
-    //     </li>
-    //   </ul>
-    // },
     getGeoJSON(){
       this.data = {
         "type":"FeatureCollection",
@@ -59,16 +52,6 @@ export default {
       zoom: 4,
       maxZoom: 7
       });
-
-      // const minTemperature = Number(this.temperatures['minTemperature'])
-      // const maxTemperature = Number(this.temperatures['maxTemperature'])
-      // var minTemperature, maxTemperature;
-      // this.temperatures.temps.forEach(function(itm) {
-      //   const min = Math.min(...itm)
-      //   const max = Math.max(...itm)
-      //   minTemperature = (minTemperature == undefined || min<minTemperature) ? min : minTemperature;
-      //   maxTemperature = (maxTemperature == undefined || max>maxTemperature) ? max : maxTemperature;
-      // });
 
       map.on('load', () => {
         // const layers = map.getStyle().layers;
@@ -157,7 +140,7 @@ export default {
   <div class='legend-scale'>
     <ul class='legend-labels'>
       <li><span :style="{background: colorScale[0]}"></span>0</li>
-      <li v-for="n in 6">
+      <li v-for="n in colorScale.length">
         <span :style="{background: colorScale[n]}"></span>{{logBase**(n-1)}}
       </li>
     </ul>
