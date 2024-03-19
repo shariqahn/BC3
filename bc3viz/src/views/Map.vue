@@ -140,7 +140,7 @@ export default {
   <div class='legend-scale'>
     <ul class='legend-labels'>
       <li><span :style="{background: colorScale[0]}"></span>0</li>
-      <li v-for="n in colorScale.length">
+      <li v-for="n in colorScale.length-1">
         <span :style="{background: colorScale[n]}"></span>{{logBase**(n-1)}}
       </li>
     </ul>
