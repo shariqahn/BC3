@@ -34,7 +34,7 @@ def get_temperature():
     filename = 'PatternScalingCoefficients_ssp370r1i1p1f1-ssp585r1i1p1f1_Regridded.nc'
     tbar              = float(request.args.get('tbar', 0))
     flat, flon, ftemp = patternscaling( tbar, filename )
-
+    
     return {
         "lats": flat.tolist(),
         "lons": flon.tolist(),
