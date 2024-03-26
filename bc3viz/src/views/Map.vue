@@ -13,7 +13,7 @@ export default {
           loaded: false,
           data: {},
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
-          colorScale: ['white', '#ffff6b', '#ffc55f', '#ff9175', '#e76c8d', '#a65b99', '#58508d'],
+          colorScale: ['white', '#ffe95c', '#ff9b4b', '#f34f66', '#ad1f84', '#2b278d'],
           logBase: 2
       }
   },
@@ -24,8 +24,14 @@ export default {
         "features":[]
       }
 
+      var count = 0
+      var maxCount = 0
       this.temperatures.forEach((lats, i) => {
         lats.forEach((temperature, j) => {
+          if (temperature >= 10) {
+            maxCount = maxCount + 1;
+          }
+          count = count + 1;
           const latitude = this.latitudes[i]
           const longitude = this.longitudes[j]
 
@@ -41,6 +47,8 @@ export default {
           this.data.features.push(feature)
         })
       })
+
+      console.log(maxCount/count);
     },
     initMap() {
       mapboxgl.accessToken = this.accessToken;
@@ -76,17 +84,29 @@ export default {
                       'interpolate',
                       ['linear'],
                       ['get', 'temperature'],
+                      // 0,
+                      // this.colorScale[0],
+                      // this.logBase,
+                      // this.colorScale[1],
+                      // this.logBase**2,
+                      // this.colorScale[2],
+                      // this.logBase**3,
+                      // this.colorScale[3],
+                      // this.logBase**4,
+                      // this.colorScale[4],
+                      // this.logBase**5,
+                      // this.colorScale[5]
                       0,
                       this.colorScale[0],
-                      this.logBase,
+                      2,
                       this.colorScale[1],
-                      this.logBase**2,
+                      4,
                       this.colorScale[2],
-                      this.logBase**3,
+                      6,
                       this.colorScale[3],
-                      this.logBase**4,
+                      8,
                       this.colorScale[4],
-                      this.logBase**5,
+                      10,
                       this.colorScale[5]
                   ],
               }
@@ -110,6 +130,7 @@ export default {
           this.temperatures = res.data.temps;
           this.latitudes = res.data.lats;
           this.longitudes = res.data.lons;
+          console.log(res.data.maxTemperature)
           this.getGeoJSON();
           this.initMap();
         })
@@ -140,9 +161,10 @@ export default {
   <div class='legend-scale'>
     <ul class='legend-labels'>
       <li><span :style="{background: colorScale[0]}"></span>0</li>
-      <li v-for="n in colorScale.length-1">
-        <span :style="{background: colorScale[n]}"></span>{{logBase**(n-1)}}
+      <li v-for="n in colorScale.length-2">
+        <span :style="{background: colorScale[n]}"></span>{{2*n}}
       </li>
+      <li><span :style="{background: colorScale[colorScale.length-1]}"></span>{{2*(colorScale.length-1)}}+</li>
     </ul>
   </div>
   </div>
