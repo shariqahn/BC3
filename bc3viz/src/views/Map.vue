@@ -121,8 +121,13 @@ export default {
       });
     },
     getTemperatures() {
-      const tbar = this.$route.query.tbar
-      const path = 'http://localhost:5000/temperature?tbar=' + tbar;
+      const query = this.$route.query.tbar
+      // todo handle error better here
+      const tbar = query ? query : 0
+      let url = window.location.origin
+      url = url.slice(0, url.lastIndexOf(":"))
+      // const path = 'http://localhost:5000/temperature?tbar=' + tbar;
+      const path = url + ':5000/temperature?tbar=' + tbar;
       axios.get(path)
         .then((res) => {
           // console.log(res)
