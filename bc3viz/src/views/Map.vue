@@ -136,8 +136,9 @@ export default {
       const tbar = query ? query : 0
       let url = window.location.origin
       url = url.slice(0, url.lastIndexOf(":"))
-      // const path = 'http://localhost:5000/temperature?tbar=' + tbar;
+      // const path = 'http://bc3.mit.edu:5000/temperature?tbar=' + tbar;
       const path = url + ':5000/temperature?tbar=' + tbar;
+      console.log('url', url)
       axios.get(path)
         .then((res) => {
           // console.log(res)
