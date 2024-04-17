@@ -136,12 +136,11 @@ export default {
       const tbar = query ? query : 0
       let url = window.location.origin
       url = url.slice(0, url.lastIndexOf(":"))
-      // const path = 'http://bc3.mit.edu:5000/temperature?tbar=' + tbar;
-      const path = url + ':5000/temperature?tbar=' + tbar;
-      console.log('url', url)
+      const path = url + ':5002/temperature?tbar=' + tbar;
       axios.get(path)
         .then((res) => {
-          // console.log(res)
+          console.log('got response from API')
+          console.log(res)
           // todo structure data
           this.temperatures = res.data.temps;
           this.latitudes = res.data.lats;
