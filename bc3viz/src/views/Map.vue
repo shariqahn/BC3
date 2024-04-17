@@ -52,13 +52,23 @@ export default {
     },
     initMap() {
       mapboxgl.accessToken = this.accessToken;
+      let longitude = this.$route.query.lon
+      let latitude = this.$route.query.lat
+      let zoom = this.$route.query.zoom
+
+      longitude = longitude ? longitude : 0
+      latitude = latitude ? latitude : 0
+      zoom = zoom ? zoom : 4
+      // todo add error handling to ensure in range
+      console.log(this.$route.query, longitude, latitude)
  
       const map = new mapboxgl.Map({
       container: 'map', 
-      projection: 'mercator',
+      projection: 'equalEarth',
       style: 'mapbox://styles/mapbox/streets-v12', 
-      zoom: 4,
-      maxZoom: 7
+      zoom: zoom,
+      maxZoom: 7,
+      center: [longitude, latitude]
       });
 
       map.on('load', () => {
@@ -137,7 +147,9 @@ export default {
           this.longitudes = res.data.lons;
           console.log(res.data.maxTemperature)
           this.getGeoJSON();
+          console.log('got geo')
           this.initMap();
+          console.log('init map')
         })
         .catch((error) => {
           console.error(error);
