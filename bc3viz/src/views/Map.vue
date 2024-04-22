@@ -13,7 +13,16 @@ export default {
           loaded: false,
           data: {},
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
-          colorScale: ['white', '#ffe95c', '#ff9b4b', '#f34f66', '#ad1f84', '#2b278d'],
+          // todo improve colors
+          colorScale: 
+          // even colorful
+          ['white', '#fff4b0', '#fbd584', '#fab35f', '#fa8d45', '#f8613a', '#f3183c', '#dd0050', '#c2005e', '#a20067', '#801569', '#5e1d65', '#3c1f5b'],
+          // even mono
+          // ['white', '#fff0ff', '#ffe0ff', '#e6c4eb', '#cda8d8', '#b38dc6', '#a17cba', '#8f6baf', '#7c5ba3', '#694b98', '#553c8d', '#3f2e83', '#252178'],
+          // unbalanced colorful
+            // ['white', '#fff4b0', '#f9d08c', '#f2ab72', '#e88563', '#d85e5e', '#c23560', '#a20067', '#8e0f69', '#791769', '#641c66', '#501f62', '#3c1f5b'],
+          // unbalanced mono
+          // ['white', '#fff0ff', '#e4cce8', '#c8a9d2', '#aa88be', '#8b69aa', '#694b98', '#5f4493', '#553c8d', '#4a3588', '#3f2e82', '#33277d', '#252178'],
           logBase: 2
       }
   },
@@ -58,13 +67,15 @@ export default {
 
       longitude = longitude ? longitude : 0
       latitude = latitude ? latitude : 0
-      zoom = zoom ? zoom : 4
+      zoom = zoom ? zoom : 1
       // todo add error handling to ensure in range
       console.log(this.$route.query, longitude, latitude)
  
       const map = new mapboxgl.Map({
       container: 'map', 
+      // todo fix search to work on equal projection
       projection: 'equalEarth',
+      // style: 'mapbox://styles/mapbox/streets-v8', 
       style: 'mapbox://styles/mapbox/streets-v12', 
       zoom: zoom,
       maxZoom: 7,
@@ -73,8 +84,10 @@ export default {
 
       map.on('load', () => {
         // const layers = map.getStyle().layers;
+        // // console.log(layers)
         // for (const layer of layers) {
-        //     if ((layer.type === 'line') || (layer.type === 'symbol')) {
+        //     // console.log(layer)
+        //     if ((layer.type === 'line')) {
         //         console.log(layer)
         //     } 
         // }
@@ -94,40 +107,43 @@ export default {
                       'interpolate',
                       ['linear'],
                       ['get', 'temperature'],
-                      // 0,
-                      // this.colorScale[0],
-                      // this.logBase,
-                      // this.colorScale[1],
-                      // this.logBase**2,
-                      // this.colorScale[2],
-                      // this.logBase**3,
-                      // this.colorScale[3],
-                      // this.logBase**4,
-                      // this.colorScale[4],
-                      // this.logBase**5,
-                      // this.colorScale[5]
                       0,
                       this.colorScale[0],
-                      2,
+                      .5,
                       this.colorScale[1],
-                      4,
+                      1,
                       this.colorScale[2],
-                      6,
+                      1.5,
                       this.colorScale[3],
-                      8,
+                      2,
                       this.colorScale[4],
-                      10,
-                      this.colorScale[5]
+                      2.5,
+                      this.colorScale[5],
+                      3,
+                      this.colorScale[6],
+                      3.5,
+                      this.colorScale[7],
+                      4,
+                      this.colorScale[8],
+                      4.5,
+                      this.colorScale[9],
+                      5,
+                      this.colorScale[10],
+                      5.5,
+                      this.colorScale[11],
+                      6,
+                      this.colorScale[12],
                   ],
               }
           },
           // todo play w layers more
           "admin-1-boundary-bg",
+          // "admin-2-boundaries-bg"
         );
 
-        const search = new MapboxSearchBox();
-        search.accessToken = this.accessToken;
-        map.addControl(search);
+        // const search = new MapboxSearchBox();
+        // search.accessToken = this.accessToken;
+        // map.addControl(search);
       });
     },
     getTemperatures() {
@@ -139,8 +155,6 @@ export default {
       const path = url + ':5002/temperature?tbar=' + tbar;
       axios.get(path)
         .then((res) => {
-          console.log('got response from API')
-          console.log(res)
           // todo structure data
           this.temperatures = res.data.temps;
           this.latitudes = res.data.lats;
@@ -179,9 +193,9 @@ export default {
     <ul class='legend-labels'>
       <li><span :style="{background: colorScale[0]}"></span>0</li>
       <li v-for="n in colorScale.length-2">
-        <span :style="{background: colorScale[n]}"></span>{{2*n}}
+        <span :style="{background: colorScale[n]}"></span>{{.5*n}}
       </li>
-      <li><span :style="{background: colorScale[colorScale.length-1]}"></span>{{2*(colorScale.length-1)}}+</li>
+      <li><span :style="{background: colorScale[colorScale.length-1]}"></span>{{.5*(colorScale.length-1)}}+</li>
     </ul>
   </div>
   </div>
@@ -217,7 +231,7 @@ export default {
 .my-legend .legend-scale ul li {
   display: block;
   float: left;
-  width: 50px;
+  width: 30px;
   margin-bottom: 6px;
   text-align: center;
   font-size: 80%;
@@ -227,7 +241,7 @@ export default {
   display: block;
   float: left;
   height: 15px;
-  width: 50px;
+  width: 30px;
   }
 .my-legend .legend-source {
   font-size: 70%;
