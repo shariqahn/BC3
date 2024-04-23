@@ -152,7 +152,7 @@ export default {
       const tbar = query ? query : 0
       let url = window.location.origin
       url = url.slice(0, url.lastIndexOf(":"))
-      const path = url + ':5002/temperature?tbar=' + tbar;
+      const path = url + '/api?tbar=' + tbar;
       axios.get(path)
         .then((res) => {
           // todo structure data

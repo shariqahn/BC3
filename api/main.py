@@ -28,7 +28,7 @@ def patternscaling( Tbar, filename ):
 app = Flask(__name__)
 CORS(app)
 # todo how many simultaneous requests can this handle
-@app.route('/temperature')
+@app.route('/')
 def get_temperature():
     # try: 
     filename = 'PatternScalingCoefficients_ssp370r1i1p1f1-ssp585r1i1p1f1_Regridded.nc'
