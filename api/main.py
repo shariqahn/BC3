@@ -75,7 +75,7 @@ def get_precipitation():
     return {
         "lats": flat.tolist(),
         "lons": flon.tolist(),
-        "change": fprel.tolist(),
+        "changes": fprel.tolist(),
         # "minPrecipitation": str(np.min(fprecipitation)), 
         # "maxPrecipitation": str(np.max(fprecipitation))
     }

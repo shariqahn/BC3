@@ -7,23 +7,17 @@ import { MapboxSearchBox } from "@mapbox/search-js-web"
 export default {
   data() {
       return {
-          temperatures: [],
+          changes: [],
           latitudes: [],
           longitudes: [],
-          loaded: false,
           data: {},
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
           // todo improve colors
-          colorScale: 
-          // even colorful
-          ['white', '#fff4b0', '#fbd584', '#fab35f', '#fa8d45', '#f8613a', '#f3183c', '#dd0050', '#c2005e', '#a20067', '#801569', '#5e1d65', '#3c1f5b'],
-          // even mono
-          // ['white', '#fff0ff', '#ffe0ff', '#e6c4eb', '#cda8d8', '#b38dc6', '#a17cba', '#8f6baf', '#7c5ba3', '#694b98', '#553c8d', '#3f2e83', '#252178'],
-          // unbalanced colorful
-            // ['white', '#fff4b0', '#f9d08c', '#f2ab72', '#e88563', '#d85e5e', '#c23560', '#a20067', '#8e0f69', '#791769', '#641c66', '#501f62', '#3c1f5b'],
-          // unbalanced mono
-          // ['white', '#fff0ff', '#e4cce8', '#c8a9d2', '#aa88be', '#8b69aa', '#694b98', '#5f4493', '#553c8d', '#4a3588', '#3f2e82', '#33277d', '#252178'],
-          logBase: 2
+          colorScale: ['rgb(255, 111, 0)', 'rgb(255, 125, 25)', 'rgb(255, 140, 51)', 'rgb(255, 154, 77)', 'rgb(255, 169, 102)', 'rgb(255, 183, 128)', 
+          'rgb(255, 197, 153)', 'rgb(255, 212, 179)', 'rgb(255, 226, 204)', 'rgb(255, 241, 230)', 'rgb(255, 255, 255)', 
+          'rgb(242, 230, 242)', 'rgb(230, 204, 230)', 'rgb(217, 179, 217)', 'rgb(204, 153, 204)', 'rgb(192, 128, 192)', 
+          'rgb(179, 102, 179)', 'rgb(166, 77, 166)', 'rgb(153, 51, 153)', 'rgb(141, 26, 141)', 'rgb(128, 0, 128)'],
+
       }
   },
   methods: {
@@ -33,14 +27,8 @@ export default {
         "features":[]
       }
 
-      var count = 0
-      var maxCount = 0
-      this.temperatures.forEach((lats, i) => {
-        lats.forEach((temperature, j) => {
-          if (temperature >= 10) {
-            maxCount = maxCount + 1;
-          }
-          count = count + 1;
+      this.changes.forEach((lats, i) => {
+        lats.forEach((change, j) => {
           const latitude = this.latitudes[i]
           const longitude = this.longitudes[j]
 
@@ -51,15 +39,15 @@ export default {
               "type": "Polygon",
               "coordinates": polygon
             },
-            "properties": {'temperature': temperature}
+            "properties": {'change': change}
           }
           this.data.features.push(feature)
         })
       })
 
-      console.log(maxCount/count);
     },
     initMap() {
+      console.log('color len', this.colorScale.size)
       mapboxgl.accessToken = this.accessToken;
       let longitude = this.$route.query.lon
       let latitude = this.$route.query.lat
@@ -83,57 +71,78 @@ export default {
       });
 
       map.on('load', () => {
-        // const layers = map.getStyle().layers;
-        // // console.log(layers)
-        // for (const layer of layers) {
-        //     // console.log(layer)
-        //     if ((layer.type === 'line')) {
-        //         console.log(layer)
-        //     } 
-        // }
 
-        map.addSource('temperature', {
+        map.addSource('precipitation', {
           type: 'geojson',
           data: this.data,
         });
 
         map.addLayer(
           {
-              'id': 'temperature-map',
-              'source': 'temperature',
+              'id': 'precipitation-map',
+              'source': 'precipitation',
               'type': 'fill',
               'paint': {
-                  'fill-color': [
-                      'interpolate',
-                      ['linear'],
-                      ['get', 'temperature'],
-                      0,
-                      this.colorScale[0],
-                      .5,
-                      this.colorScale[1],
-                      1,
-                      this.colorScale[2],
-                      1.5,
-                      this.colorScale[3],
-                      2,
-                      this.colorScale[4],
-                      2.5,
-                      this.colorScale[5],
-                      3,
-                      this.colorScale[6],
-                      3.5,
-                      this.colorScale[7],
-                      4,
-                      this.colorScale[8],
-                      4.5,
-                      this.colorScale[9],
-                      5,
-                      this.colorScale[10],
-                      5.5,
-                      this.colorScale[11],
-                      6,
-                      this.colorScale[12],
-                  ],
+                //   'fill-color': [
+                //       'interpolate',
+                //       ['linear'],
+                //       ['get', 'change'],
+                //       -100,
+                //       'yellow',
+                //       0,
+                //       'white',
+                //       100,
+                //       'purple'
+                //   ],
+                    'fill-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'change'],
+                        -100,
+                        this.colorScale[0],
+                        -90,
+                        this.colorScale[1],
+                        -80,
+                        this.colorScale[2],
+                        -70,
+                        this.colorScale[3],
+                        -60,
+                        this.colorScale[4],
+                        -50,
+                        this.colorScale[5],
+                        -40,
+                        this.colorScale[6],
+                        -30,
+                        this.colorScale[7],
+                        -20,
+                        this.colorScale[8],
+                        -10,
+                        this.colorScale[9],
+                        0,
+                        this.colorScale[10],
+                        10,
+                        this.colorScale[11],
+                        20,
+                        this.colorScale[12],
+                        30,
+                        this.colorScale[13],
+                        40,
+                        this.colorScale[14],
+                        50,
+                        this.colorScale[15],
+                        60,
+                        this.colorScale[16],
+                        70,
+                        this.colorScale[17],
+                        80,
+                        this.colorScale[18],
+                        90,
+                        this.colorScale[19],
+                        100,
+                        this.colorScale[20],
+
+                    ],
+
               }
           },
           // todo play w layers more
@@ -146,24 +155,21 @@ export default {
         // map.addControl(search);
       });
     },
-    getTemperatures() {
+    getPrecipitationChange() {
       const query = this.$route.query.tbar
       // todo handle error better here
       const tbar = query ? query : 0
       let url = window.location.origin
       url = url.slice(0, url.lastIndexOf(":"))
-      const path = url + ':5002/temperature?tbar=' + tbar;
+      const path = url + ':5002/precipitation?tbar=' + tbar;
       axios.get(path)
         .then((res) => {
           // todo structure data
-          this.temperatures = res.data.temps;
+          this.changes = res.data.changes;
           this.latitudes = res.data.lats;
           this.longitudes = res.data.lons;
-          console.log(res.data.maxTemperature)
           this.getGeoJSON();
-          console.log('got geo')
           this.initMap();
-          console.log('init map')
         })
         .catch((error) => {
           console.error(error);
@@ -171,12 +177,12 @@ export default {
     },
   },
   created() {
-    this.getTemperatures();
+    this.getPrecipitationChange();
     this.$watch(
       () => this.$route.query,
       (toParams, previousParams) => {
         // todo react to route changes
-        this.getTemperatures();
+        this.getPrecipitationChange();
       }
     )
   }
@@ -188,14 +194,15 @@ export default {
   <div id="map"></div>
   <!-- todo move to new component -->
   <div class='my-legend'>
-  <div class='legend-title'>Temperature Increase (C)</div>
+  <div class='legend-title'>Precipitation Change (%PI)</div>
   <div class='legend-scale'>
     <ul class='legend-labels'>
-      <li><span :style="{background: colorScale[0]}"></span>0</li>
-      <li v-for="n in colorScale.length-2">
-        <span :style="{background: colorScale[n]}"></span>{{.5*n}}
+      <li><span :style="{background: colorScale[0]}"></span>-100</li>
+      <li v-for="n in colorScale.length-1">
+        <span :style="{background: colorScale[n]}"></span>
+        <span v-if="n%2==0">{{10*n-100}}</span>
       </li>
-      <li><span :style="{background: colorScale[colorScale.length-1]}"></span>{{.5*(colorScale.length-1)}}+</li>
+      <!-- <li><span :style="{background: colorScale[colorScale.length-1]}"></span>{{.5*(colorScale.length-1)}}+</li> -->
     </ul>
   </div>
   </div>
@@ -231,7 +238,7 @@ export default {
 .my-legend .legend-scale ul li {
   display: block;
   float: left;
-  width: 30px;
+  width: 20px;
   margin-bottom: 6px;
   text-align: center;
   font-size: 80%;
@@ -241,7 +248,7 @@ export default {
   display: block;
   float: left;
   height: 15px;
-  width: 30px;
+  width: 20px;
   }
 .my-legend .legend-source {
   font-size: 70%;

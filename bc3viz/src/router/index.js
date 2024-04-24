@@ -4,20 +4,20 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/map',
-      name: 'map',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/Map.vue')
+      path: '/precipitation',
+      name: 'precipitation',
+      component: () => import('../views/Precipitation.vue')
     },
+    {
+      path: '/temperature',
+      name: 'temperature',
+      component: () => import('../views/Temperature.vue')
+    },
+    // todo change this to a real home page
     {
       path: '/',
       name: 'home',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/Map.vue')
+      component: () => import('../views/Temperature.vue')
     }
   ]
 })
