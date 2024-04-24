@@ -152,8 +152,8 @@ export default {
       const tbar = query ? query : 0
       let url = window.location.origin
       // console.log(url)
-      // url = url.slice(0, url.lastIndexOf("/"))
-      console.log(url)
+      // let path = 'http://localhost:5002/?tbar=3'
+      // console.log(url)
       const path = url + '/api?tbar=' + tbar;
       console.log(path)
       axios.get(path)
