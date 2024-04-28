@@ -73,7 +73,7 @@ export default {
       const map = new mapboxgl.Map({
       container: 'map', 
       // todo fix search to work on equal projection
-      projection: 'equalEarth',
+      projection: 'globe',
       // style: 'mapbox://styles/mapbox/streets-v8', 
       style: 'mapbox://styles/mapbox/streets-v12', 
       zoom: zoom,
@@ -140,9 +140,11 @@ export default {
           // "admin-2-boundaries-bg"
         );
 
-        // const search = new MapboxSearchBox();
-        // search.accessToken = this.accessToken;
-        // map.addControl(search);
+        const search = new MapboxSearchBox();
+        search.accessToken = this.accessToken;
+        search.bindMap(map);
+        map.addControl(search);
+        map.addControl(new mapboxgl.NavigationControl());
       });
     },
     getTemperatures() {
