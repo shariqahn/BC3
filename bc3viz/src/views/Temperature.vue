@@ -152,8 +152,11 @@ export default {
       // todo handle error better here
       const tbar = query ? query : 0
       let url = window.location.origin
-      url = url.slice(0, url.lastIndexOf(":"))
-      const path = url + ':5002/temperature?tbar=' + tbar;
+      console.log(url)
+      //let path = 'localhost:5002'
+      console.log(url)
+      const path = url + '/api/?tbar=' + tbar;
+      console.log(path)
       axios.get(path)
         .then((res) => {
           // todo structure data
