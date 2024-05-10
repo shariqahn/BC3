@@ -22,7 +22,10 @@ export default {
             // ['white', '#fff4b0', '#f9d08c', '#f2ab72', '#e88563', '#d85e5e', '#c23560', '#a20067', '#8e0f69', '#791769', '#641c66', '#501f62', '#3c1f5b'],
           // unbalanced mono
           // ['white', '#fff0ff', '#e4cce8', '#c8a9d2', '#aa88be', '#8b69aa', '#694b98', '#5f4493', '#553c8d', '#4a3588', '#3f2e82', '#33277d', '#252178'],
-          logBase: 2
+          logBase: 2,
+          loaded: false
+          // ,
+          // map
       }
   },
   methods: {
@@ -145,7 +148,23 @@ export default {
         search.bindMap(map);
         map.addControl(search);
         map.addControl(new mapboxgl.NavigationControl());
+
+        // const camera = map.getCamera();
+        // console.log(camera);
+        // this.loaded = true;
       });
+    },
+    updateMap() {
+      let longitude = this.$route.query.lon
+      let latitude = this.$route.query.lat
+      let zoom = this.$route.query.zoom
+
+      longitude = longitude ? longitude : 0
+      latitude = latitude ? latitude : 0
+      zoom = zoom ? zoom : 1
+      console.log('updating')
+ 
+      
     },
     getTemperatures() {
       const query = this.$route.query.tbar

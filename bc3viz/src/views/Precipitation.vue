@@ -13,10 +13,12 @@ export default {
           data: {},
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
           // todo improve colors
-          colorScale: ['rgb(255, 111, 0)', 'rgb(255, 125, 25)', 'rgb(255, 140, 51)', 'rgb(255, 154, 77)', 'rgb(255, 169, 102)', 'rgb(255, 183, 128)', 
-          'rgb(255, 197, 153)', 'rgb(255, 212, 179)', 'rgb(255, 226, 204)', 'rgb(255, 241, 230)', 'rgb(255, 255, 255)', 
-          'rgb(242, 230, 242)', 'rgb(230, 204, 230)', 'rgb(217, 179, 217)', 'rgb(204, 153, 204)', 'rgb(192, 128, 192)', 
-          'rgb(179, 102, 179)', 'rgb(166, 77, 166)', 'rgb(153, 51, 153)', 'rgb(141, 26, 141)', 'rgb(128, 0, 128)'],
+          colorScale: 
+          // ['rgb(255, 111, 0)', 'rgb(255, 125, 25)', 'rgb(255, 140, 51)', 'rgb(255, 154, 77)', 'rgb(255, 169, 102)', 'rgb(255, 183, 128)', 
+          // 'rgb(255, 197, 153)', 'rgb(255, 212, 179)', 'rgb(255, 226, 204)', 'rgb(255, 241, 230)', 'rgb(255, 255, 255)', 
+          // 'rgb(242, 230, 242)', 'rgb(230, 204, 230)', 'rgb(217, 179, 217)', 'rgb(204, 153, 204)', 'rgb(192, 128, 192)', 
+          // 'rgb(179, 102, 179)', 'rgb(166, 77, 166)', 'rgb(153, 51, 153)', 'rgb(141, 26, 141)', 'rgb(128, 0, 128)'],
+          ['#ff6f00', '#ff9550', '#ffb889', '#ffdcc3', 'white', '#e2c5df', '#c38bbf', '#a2529f', '#800080']
 
       }
   },
@@ -62,7 +64,8 @@ export default {
       const map = new mapboxgl.Map({
       container: 'map', 
       // todo fix search to work on equal projection
-      projection: 'equalEarth',
+      // projection: 'equalEarth',
+      projection: 'globe',
       // style: 'mapbox://styles/mapbox/streets-v8', 
       style: 'mapbox://styles/mapbox/streets-v12', 
       zoom: zoom,
@@ -98,48 +101,24 @@ export default {
                         'interpolate',
                         ['linear'],
                         ['get', 'change'],
-                        -100,
-                        this.colorScale[0],
-                        -90,
-                        this.colorScale[1],
-                        -80,
-                        this.colorScale[2],
-                        -70,
-                        this.colorScale[3],
-                        -60,
-                        this.colorScale[4],
-                        -50,
-                        this.colorScale[5],
                         -40,
-                        this.colorScale[6],
+                        this.colorScale[0],
                         -30,
-                        this.colorScale[7],
+                        this.colorScale[1],
                         -20,
-                        this.colorScale[8],
+                        this.colorScale[2],
                         -10,
-                        this.colorScale[9],
+                        this.colorScale[3],
                         0,
-                        this.colorScale[10],
+                        this.colorScale[4],
                         10,
-                        this.colorScale[11],
+                        this.colorScale[5],
                         20,
-                        this.colorScale[12],
+                        this.colorScale[6],
                         30,
-                        this.colorScale[13],
+                        this.colorScale[7],
                         40,
-                        this.colorScale[14],
-                        50,
-                        this.colorScale[15],
-                        60,
-                        this.colorScale[16],
-                        70,
-                        this.colorScale[17],
-                        80,
-                        this.colorScale[18],
-                        90,
-                        this.colorScale[19],
-                        100,
-                        this.colorScale[20],
+                        this.colorScale[8]
 
                     ],
 
@@ -150,9 +129,10 @@ export default {
           // "admin-2-boundaries-bg"
         );
 
-        // const search = new MapboxSearchBox();
-        // search.accessToken = this.accessToken;
-        // map.addControl(search);
+        const search = new MapboxSearchBox();
+        search.accessToken = this.accessToken;
+        map.addControl(search);
+        map.addControl(new mapboxgl.NavigationControl());
       });
     },
     getPrecipitationChange() {
@@ -197,12 +177,9 @@ export default {
   <div class='legend-title'>Precipitation Change (%PI)</div>
   <div class='legend-scale'>
     <ul class='legend-labels'>
-      <li><span :style="{background: colorScale[0]}"></span>-100</li>
-      <li v-for="n in colorScale.length-1">
-        <span :style="{background: colorScale[n]}"></span>
-        <span v-if="n%2==0">{{10*n-100}}</span>
+      <li v-for="n in colorScale.length">
+        <span :style="{background: colorScale[n-1]}"></span>{{10*(n-1)-40}}
       </li>
-      <!-- <li><span :style="{background: colorScale[colorScale.length-1]}"></span>{{.5*(colorScale.length-1)}}+</li> -->
     </ul>
   </div>
   </div>
@@ -238,7 +215,7 @@ export default {
 .my-legend .legend-scale ul li {
   display: block;
   float: left;
-  width: 20px;
+  width: 35px;
   margin-bottom: 6px;
   text-align: center;
   font-size: 80%;
@@ -248,7 +225,7 @@ export default {
   display: block;
   float: left;
   height: 15px;
-  width: 20px;
+  width: 35px;
   }
 .my-legend .legend-source {
   font-size: 70%;
