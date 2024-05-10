@@ -140,8 +140,8 @@ export default {
       // todo handle error better here
       const tbar = query ? query : 0
       let url = window.location.origin
-      url = url.slice(0, url.lastIndexOf(":"))
-      const path = url + ':5002/precipitation?tbar=' + tbar;
+      //url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + '/api/precipitation?tbar=' + tbar;
       axios.get(path)
         .then((res) => {
           // todo structure data

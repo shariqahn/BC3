@@ -174,7 +174,7 @@ export default {
       console.log(url)
       //let path = 'localhost:5002'
       console.log(url)
-      const path = url + '/api/?tbar=' + tbar;
+      const path = url + '/api/temperature?tbar=' + tbar;
       console.log(path)
       axios.get(path)
         .then((res) => {
