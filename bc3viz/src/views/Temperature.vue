@@ -53,13 +53,15 @@ export default {
               "type": "Polygon",
               "coordinates": polygon
             },
-            "properties": {'temperature': temperature}
+            "properties": {
+              'temperature': temperature,
+              'center': [longitude, latitude]
+            }
           }
           this.data.features.push(feature)
         })
       })
 
-      console.log(maxCount/count);
     },
     initMap() {
       mapboxgl.accessToken = this.accessToken;
@@ -69,9 +71,8 @@ export default {
 
       longitude = longitude ? longitude : 0
       latitude = latitude ? latitude : 0
-      zoom = zoom ? zoom : 1
+      zoom = zoom ? zoom : 2
       // todo add error handling to ensure in range
-      console.log(this.$route.query, longitude, latitude)
  
       const map = new mapboxgl.Map({
       container: 'map', 
@@ -143,6 +144,12 @@ export default {
           // "admin-2-boundaries-bg"
         );
 
+        const popup = new mapboxgl.Popup();
+        map.on('click', 'temperature-map', (e) => {
+            const temperature = e.features[0].properties.temperature.toFixed(2)
+            popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &degC').addTo(map);
+        });
+
         const search = new MapboxSearchBox();
         search.accessToken = this.accessToken;
         search.bindMap(map);
@@ -162,7 +169,6 @@ export default {
       longitude = longitude ? longitude : 0
       latitude = latitude ? latitude : 0
       zoom = zoom ? zoom : 1
-      console.log('updating')
  
       
     },
@@ -171,22 +177,15 @@ export default {
       // todo handle error better here
       const tbar = query ? query : 0
       let url = window.location.origin
-      console.log(url)
-      //let path = 'localhost:5002'
-      console.log(url)
       const path = url + '/api/temperature?tbar=' + tbar;
-      console.log(path)
       axios.get(path)
         .then((res) => {
           // todo structure data
           this.temperatures = res.data.temps;
           this.latitudes = res.data.lats;
           this.longitudes = res.data.lons;
-          console.log(res.data.maxTemperature)
           this.getGeoJSON();
-          console.log('got geo')
           this.initMap();
-          console.log('init map')
         })
         .catch((error) => {
           console.error(error);
