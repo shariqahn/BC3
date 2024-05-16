@@ -53,7 +53,10 @@ export default {
               "type": "Polygon",
               "coordinates": polygon
             },
-            "properties": {'temperature': temperature}
+            "properties": {
+              'temperature': temperature,
+              'center': [longitude, latitude]
+            }
           }
           this.data.features.push(feature)
         })
@@ -69,7 +72,7 @@ export default {
 
       longitude = longitude ? longitude : 0
       latitude = latitude ? latitude : 0
-      zoom = zoom ? zoom : 1
+      zoom = zoom ? zoom : 2
       // todo add error handling to ensure in range
       console.log(this.$route.query, longitude, latitude)
  
@@ -143,6 +146,12 @@ export default {
           // "admin-2-boundaries-bg"
         );
 
+        const popup = new mapboxgl.Popup();
+        map.on('click', 'temperature-map', (e) => {
+            const temperature = e.features[0].properties.temperature.toFixed(2)
+            popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &degC').addTo(map);
+        });
+
         const search = new MapboxSearchBox();
         search.accessToken = this.accessToken;
         search.bindMap(map);
@@ -171,11 +180,9 @@ export default {
       // todo handle error better here
       const tbar = query ? query : 0
       let url = window.location.origin
-      console.log(url)
-      //let path = 'localhost:5002'
-      console.log(url)
-      const path = url + '/api/?tbar=' + tbar;
-      console.log(path)
+      // const path = url + '/api/?tbar=' + tbar;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + tbar;
       axios.get(path)
         .then((res) => {
           // todo structure data

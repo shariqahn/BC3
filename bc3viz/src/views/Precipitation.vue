@@ -129,6 +129,12 @@ export default {
           // "admin-2-boundaries-bg"
         );
 
+        const popup = new mapboxgl.Popup();
+        map.on('click', 'precipitation-map', (e) => {
+            const change = e.features[0].properties.change.toFixed(2)
+            popup.setLngLat(e.lngLat).setHTML(change + '%').addTo(map);
+        });
+
         const search = new MapboxSearchBox();
         search.accessToken = this.accessToken;
         map.addControl(search);
