@@ -14,8 +14,10 @@ export default {
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
           // todo improve colors
           colorScale: 
+          // IPCC
+          ['rgb(254, 254, 203)', 'rgb(252, 240, 165)', 'rgb(248, 222, 127)', 'rgb(241, 195, 95)', 'rgb(235, 167, 84)', 'rgb(230, 142, 81)', 'rgb(222, 116, 79)', 'rgb(200, 89 ,74)', 'rgb(164, 70 ,66)', 'rgb(126, 59 ,52)', 'rgb(89 ,47, 35)', 'rgb(55 ,36, 19)', 'rgb(25 ,25, 0)'],
           // even colorful
-          ['white', '#fff4b0', '#fbd584', '#fab35f', '#fa8d45', '#f8613a', '#f3183c', '#dd0050', '#c2005e', '#a20067', '#801569', '#5e1d65', '#3c1f5b'],
+          // ['white', '#fff4b0', '#fbd584', '#fab35f', '#fa8d45', '#f8613a', '#f3183c', '#dd0050', '#c2005e', '#a20067', '#801569', '#5e1d65', '#3c1f5b'],
           // even mono
           // ['white', '#fff0ff', '#ffe0ff', '#e6c4eb', '#cda8d8', '#b38dc6', '#a17cba', '#8f6baf', '#7c5ba3', '#694b98', '#553c8d', '#3f2e83', '#252178'],
           // unbalanced colorful
@@ -35,14 +37,8 @@ export default {
         "features":[]
       }
 
-      var count = 0
-      var maxCount = 0
       this.temperatures.forEach((lats, i) => {
         lats.forEach((temperature, j) => {
-          if (temperature >= 10) {
-            maxCount = maxCount + 1;
-          }
-          count = count + 1;
           const latitude = this.latitudes[i]
           const longitude = this.longitudes[j]
 
@@ -61,8 +57,6 @@ export default {
           this.data.features.push(feature)
         })
       })
-
-      console.log(maxCount/count);
     },
     initMap() {
       mapboxgl.accessToken = this.accessToken;
@@ -97,6 +91,14 @@ export default {
         //     } 
         // }
 
+        // remove globe halo
+        map.setFog({
+            // "color": "#245cdf",
+            "horizon-blend": 0,
+            // "space-color": "red",
+            // "high-color": "yellow",
+          });
+          
         map.addSource('temperature', {
           type: 'geojson',
           data: this.data,
@@ -148,7 +150,7 @@ export default {
 
         const popup = new mapboxgl.Popup();
         map.on('click', 'temperature-map', (e) => {
-            const temperature = e.features[0].properties.temperature.toFixed(2)
+            const temperature = e.features[0].properties.temperature.toFixed(1)
             popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &degC').addTo(map);
         });
 
@@ -162,6 +164,17 @@ export default {
         // console.log(camera);
         // this.loaded = true;
       });
+
+      // map.on('moveend', () => {
+      //   console.log('boo');
+
+      //   let win = window.parent;
+      //   win.postMessage('hi parent');
+      //   // window.postMessage({
+      //   //   "center": map.getCenter(),
+      //   //   "zoom": map.getZoom()
+      //   // });
+      // });
     },
     updateMap() {
       let longitude = this.$route.query.lon
@@ -189,11 +202,15 @@ export default {
           this.temperatures = res.data.temps;
           this.latitudes = res.data.lats;
           this.longitudes = res.data.lons;
-          console.log(res.data.maxTemperature)
+          // window.addEventListener("message", (event) => {
+          //     console.log('messaged!')
+          //     if (event.origin !== "http://localhost:5173") return;
+              
+          //     console.log('received!')
+          //     console.log(event);
+          // });
           this.getGeoJSON();
-          console.log('got geo')
           this.initMap();
-          console.log('init map')
         })
         .catch((error) => {
           console.error(error);
@@ -206,7 +223,7 @@ export default {
       () => this.$route.query,
       (toParams, previousParams) => {
         // todo react to route changes
-        this.getTemperatures();
+        this.updateMap();
       }
     )
   }
@@ -218,7 +235,7 @@ export default {
   <div id="map"></div>
   <!-- todo move to new component -->
   <div class='my-legend'>
-  <div class='legend-title'>Temperature Increase (C)</div>
+  <div class='legend-title'>Temperature Increase (&degC)</div>
   <div class='legend-scale'>
     <ul class='legend-labels'>
       <li><span :style="{background: colorScale[0]}"></span>0</li>
@@ -244,6 +261,7 @@ export default {
   height: 100%;
 
   z-index: 1;
+  color: black;
 }
 
 .my-legend .legend-title {
@@ -257,6 +275,8 @@ export default {
   padding: 0;
   float: left;
   list-style: none;
+  /* -webkit-text-stroke-color: white; */
+
   }
 .my-legend .legend-scale ul li {
   display: block;
@@ -266,18 +286,24 @@ export default {
   text-align: center;
   font-size: 80%;
   list-style: none;
+  /* -webkit-text-stroke-color: white;
+  -webkit-text-stroke-width: .2px; */
+
   }
 .my-legend ul.legend-labels li span {
   display: block;
   float: left;
   height: 15px;
   width: 30px;
+  /* -webkit-text-stroke-color: white;
+  -webkit-text-stroke-width: 3px; */
+
   }
-.my-legend .legend-source {
+/* .my-legend .legend-source {
   font-size: 70%;
   color: #999;
   clear: both;
-  }
+  } */
 .my-legend a {
   color: #777;
   }
@@ -288,12 +314,19 @@ export default {
   right: 15px;
   position: absolute;
   background-color: white;
+  color: #333333;
   padding-right: 7px;
   padding-left: 7px;
-  border-color: grey;
+  border-color:rgba(0, 0, 0, .1);
   border-style: solid;
   border-radius: 5px;
   border-width: 1px;
 }
+
+/* @media (prefers-color-scheme: dark) {
+  .my-legend {
+    background-color: #181818;
+  }
+} */
 
 </style>
