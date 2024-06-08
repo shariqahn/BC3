@@ -165,16 +165,18 @@ export default {
         // this.loaded = true;
       });
 
-      // map.on('moveend', () => {
-      //   console.log('boo');
-
-      //   let win = window.parent;
-      //   win.postMessage('hi parent');
-      //   // window.postMessage({
-      //   //   "center": map.getCenter(),
-      //   //   "zoom": map.getZoom()
-      //   // });
-      // });
+      map.on('moveend', () => {
+        let win = window.parent;
+        win.postMessage('hi parent');
+        win = window.opener;
+        win.postMessage('hi open');
+        win = window;
+        win.postMessage('hi window');
+        // window.postMessage({
+        //   "center": map.getCenter(),
+        //   "zoom": map.getZoom()
+        // });
+      });
     },
     updateMap() {
       let longitude = this.$route.query.lon
