@@ -14,11 +14,8 @@ export default {
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
           // todo improve colors
           colorScale: 
-          // ['rgb(255, 111, 0)', 'rgb(255, 125, 25)', 'rgb(255, 140, 51)', 'rgb(255, 154, 77)', 'rgb(255, 169, 102)', 'rgb(255, 183, 128)', 
-          // 'rgb(255, 197, 153)', 'rgb(255, 212, 179)', 'rgb(255, 226, 204)', 'rgb(255, 241, 230)', 'rgb(255, 255, 255)', 
-          // 'rgb(242, 230, 242)', 'rgb(230, 204, 230)', 'rgb(217, 179, 217)', 'rgb(204, 153, 204)', 'rgb(192, 128, 192)', 
-          // 'rgb(179, 102, 179)', 'rgb(166, 77, 166)', 'rgb(153, 51, 153)', 'rgb(141, 26, 141)', 'rgb(128, 0, 128)'],
-          ['#ff6f00', '#ff9550', '#ffb889', '#ffdcc3', 'white', '#e2c5df', '#c38bbf', '#a2529f', '#800080']
+          ['rgb(84, 48, 5)', 'rgb(150, 98, 30)', 'rgb(200, 148, 79)', 'rgb(224, 199, 164)', 'rgb(248, 248, 247)', 'rgb(167, 208, 204)', 'rgb(85, 167, 160)', 'rgb(33, 116, 107)', 'rgb(0, 60, 48)']
+          // ['#ff6f00', '#ff9550', '#ffb889', '#ffdcc3', 'white', '#e2c5df', '#c38bbf', '#a2529f', '#800080']
 
       }
   },
@@ -57,7 +54,7 @@ export default {
 
       longitude = longitude ? longitude : 0
       latitude = latitude ? latitude : 0
-      zoom = zoom ? zoom : 1
+      zoom = zoom ? zoom : 2
       // todo add error handling to ensure in range
       console.log(this.$route.query, longitude, latitude)
  
@@ -74,6 +71,14 @@ export default {
       });
 
       map.on('load', () => {
+        const search = new MapboxSearchBox();
+        search.accessToken = this.accessToken;
+        map.addControl(search);
+        map.addControl(new mapboxgl.NavigationControl());
+        // // remove globe halo
+        map.setFog({
+            "horizon-blend": 0,
+          });
 
         map.addSource('precipitation', {
           type: 'geojson',
@@ -86,17 +91,6 @@ export default {
               'source': 'precipitation',
               'type': 'fill',
               'paint': {
-                //   'fill-color': [
-                //       'interpolate',
-                //       ['linear'],
-                //       ['get', 'change'],
-                //       -100,
-                //       'yellow',
-                //       0,
-                //       'white',
-                //       100,
-                //       'purple'
-                //   ],
                     'fill-color': [
                         'interpolate',
                         ['linear'],
@@ -131,14 +125,9 @@ export default {
 
         const popup = new mapboxgl.Popup();
         map.on('click', 'precipitation-map', (e) => {
-            const change = e.features[0].properties.change.toFixed(2)
+            const change = e.features[0].properties.change.toFixed(1)
             popup.setLngLat(e.lngLat).setHTML(change + '%').addTo(map);
         });
-
-        const search = new MapboxSearchBox();
-        search.accessToken = this.accessToken;
-        map.addControl(search);
-        map.addControl(new mapboxgl.NavigationControl());
       });
     },
     getPrecipitationChange() {
@@ -204,6 +193,7 @@ export default {
   height: 100%;
 
   z-index: 1;
+  color: black;
 }
 
 .my-legend .legend-title {
@@ -248,9 +238,10 @@ export default {
   right: 15px;
   position: absolute;
   background-color: white;
+  color: #333333;
   padding-right: 7px;
   padding-left: 7px;
-  border-color: grey;
+  border-color:rgba(0, 0, 0, .1);
   border-style: solid;
   border-radius: 5px;
   border-width: 1px;
