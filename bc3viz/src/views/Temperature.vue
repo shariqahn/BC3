@@ -166,12 +166,12 @@ export default {
       });
 
       map.on('moveend', () => {
-        let win = window.parent;
-        win.postMessage('hi parent');
-        win = window.opener;
+        // let win = window.parent;
+        // win.postMessage('hi parent');
+        let win = window.opener;
         win.postMessage('hi open');
-        win = window;
-        win.postMessage('hi window');
+        // let win = window;
+        // win.postMessage('hi window');
         // window.postMessage({
         //   "center": map.getCenter(),
         //   "zoom": map.getZoom()
