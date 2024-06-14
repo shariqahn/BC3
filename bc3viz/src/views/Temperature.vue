@@ -47,12 +47,9 @@ export default {
           this.data.features.push(feature)
         })
       })
-      console.log(this.data.features[0]);
     },
     initMap() {
       console.log('init');
-      console.log(this.data.features[0])
-
       mapboxgl.accessToken = this.accessToken;
       let longitude = this.$route.query.lon
       let latitude = this.$route.query.lat
@@ -84,10 +81,10 @@ export default {
         //     } 
         // }
 
-        // Remove globe halo to allow for contrast between black background and color scale
-        this.map.setFog({
-            "horizon-blend": 0,
-          });
+        // // Remove globe halo to allow for contrast between black background and color scale
+        // this.map.setFog({
+        //     "horizon-blend": 0,
+        //   });
           
         this.map.addSource('temperature', {
           type: 'geojson',
@@ -138,17 +135,17 @@ export default {
           // "admin-2-boundaries-bg"
         );
 
-        const popup = new mapboxgl.Popup();
-        this.map.on('click', 'temperature-map', (e) => {
-            const temperature = e.features[0].properties.temperature.toFixed(1)
-            popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &degC').addTo(this.map);
-        });
-
         // const search = new MapboxSearchBox();
         // search.accessToken = this.accessToken;
         // search.bindMap(this.map);
         // this.map.addControl(search);
         // this.map.addControl(new mapboxgl.NavigationControl());
+
+        const popup = new mapboxgl.Popup();
+        this.map.on('click', 'temperature-map', (e) => {
+            const temperature = e.features[0].properties.temperature.toFixed(1)
+            popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &degC').addTo(this.map);
+        });
 
         // const camera = this.map.getCamera();
         // console.log(camera);
@@ -179,11 +176,6 @@ export default {
         });
     },
     async getTemperatures() {
-      const query = this.$route.query.tbar
-      // todo handle error better here
-      if (query) {
-        this.tbar = query;
-      }
       let url = window.location.origin
       // const path = url + '/api/?tbar=' + tbar;
       url = url.slice(0, url.lastIndexOf(":"))
@@ -202,6 +194,11 @@ export default {
     },
   },
   mounted() {
+    const query = this.$route.query.tbar
+    // todo handle error better here
+    if (query) {
+      this.tbar = query;
+    }
     this.getTemperatures()
       .then(() => {
         this.initMap();
@@ -210,11 +207,16 @@ export default {
         console.error('Error occurred during the first function:', error);
       });
     window.addEventListener("message", (event) => {
-      if (event.origin !== "https://en-roads.climateinteractive.org") return;
+      // if (event.origin !== "https://en-roads.climateinteractive.org") return;
       // console.log(event.data);
-      this.tbar += event.data.tbar;
-      console.log('new tbar: ', tbar);
-      this.updateMap();
+      if (isNaN(event.data.tbar)) {
+        console.error('The new tbar value is non a number.');
+      } else {
+        this.tbar = Number(this.tbar) + Number(event.data.tbar);
+        console.log('new tbar: ', this.tbar);
+        this.updateMap();
+      }
+      
     });
     
   }
