@@ -12,22 +12,12 @@ export default {
           longitudes: [],
           data: {},
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
-          // todo improve colors
           colorScale: 
           // IPCC
           ['rgb(254, 254, 203)', 'rgb(252, 240, 165)', 'rgb(248, 222, 127)', 'rgb(241, 195, 95)', 'rgb(235, 167, 84)', 'rgb(230, 142, 81)', 'rgb(222, 116, 79)', 'rgb(200, 89 ,74)', 'rgb(164, 70 ,66)', 'rgb(126, 59 ,52)', 'rgb(89 ,47, 35)', 'rgb(55 ,36, 19)', 'rgb(25 ,25, 0)'],
-          // even colorful
-          // ['white', '#fff4b0', '#fbd584', '#fab35f', '#fa8d45', '#f8613a', '#f3183c', '#dd0050', '#c2005e', '#a20067', '#801569', '#5e1d65', '#3c1f5b'],
-          // even mono
-          // ['white', '#fff0ff', '#ffe0ff', '#e6c4eb', '#cda8d8', '#b38dc6', '#a17cba', '#8f6baf', '#7c5ba3', '#694b98', '#553c8d', '#3f2e83', '#252178'],
-          // unbalanced colorful
-            // ['white', '#fff4b0', '#f9d08c', '#f2ab72', '#e88563', '#d85e5e', '#c23560', '#a20067', '#8e0f69', '#791769', '#641c66', '#501f62', '#3c1f5b'],
-          // unbalanced mono
-          // ['white', '#fff0ff', '#e4cce8', '#c8a9d2', '#aa88be', '#8b69aa', '#694b98', '#5f4493', '#553c8d', '#4a3588', '#3f2e82', '#33277d', '#252178'],
           logBase: 2,
-          loaded: false
-          // ,
-          // map
+          tbar: 0,
+          map: undefined
       }
   },
   methods: {
@@ -60,6 +50,9 @@ export default {
 
     },
     initMap() {
+      console.log('init');
+      console.log(this.data.features[0])
+
       mapboxgl.accessToken = this.accessToken;
       let longitude = this.$route.query.lon
       let latitude = this.$route.query.lat
@@ -69,20 +62,20 @@ export default {
       latitude = latitude ? latitude : 0
       zoom = zoom ? zoom : 2
       // todo add error handling to ensure in range
- 
-      const map = new mapboxgl.Map({
-      container: 'map', 
-      // todo fix search to work on equal projection
-      projection: 'globe',
-      // style: 'mapbox://styles/mapbox/streets-v8', 
-      style: 'mapbox://styles/mapbox/streets-v12', 
-      zoom: zoom,
-      maxZoom: 7,
-      center: [longitude, latitude]
+
+      // const 
+      this.map = new mapboxgl.Map({
+        container: 'map', 
+        projection: 'globe',
+        // style: 'mapbox://styles/mapbox/streets-v8', 
+        style: 'mapbox://styles/mapbox/streets-v12', 
+        zoom: zoom,
+        maxZoom: 7,
+        center: [longitude, latitude]
       });
 
-      map.on('load', () => {
-        // const layers = map.getStyle().layers;
+      this.map.on('load', () => {
+        // const layers = this.map.getStyle().layers;
         // // console.log(layers)
         // for (const layer of layers) {
         //     // console.log(layer)
@@ -91,20 +84,17 @@ export default {
         //     } 
         // }
 
-        // remove globe halo
-        map.setFog({
-            // "color": "#245cdf",
+        // Remove globe halo to allow for contrast between black background and color scale
+        this.map.setFog({
             "horizon-blend": 0,
-            // "space-color": "red",
-            // "high-color": "yellow",
           });
           
-        map.addSource('temperature', {
+        this.map.addSource('temperature', {
           type: 'geojson',
           data: this.data,
         });
 
-        map.addLayer(
+        this.map.addLayer(
           {
               'id': 'temperature-map',
               'source': 'temperature',
@@ -149,76 +139,83 @@ export default {
         );
 
         const popup = new mapboxgl.Popup();
-        map.on('click', 'temperature-map', (e) => {
+        this.map.on('click', 'temperature-map', (e) => {
             const temperature = e.features[0].properties.temperature.toFixed(1)
-            popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &degC').addTo(map);
+            popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &degC').addTo(this.map);
         });
 
-        const search = new MapboxSearchBox();
-        search.accessToken = this.accessToken;
-        search.bindMap(map);
-        map.addControl(search);
-        map.addControl(new mapboxgl.NavigationControl());
+        // const search = new MapboxSearchBox();
+        // search.accessToken = this.accessToken;
+        // search.bindMap(this.map);
+        // this.map.addControl(search);
+        // this.map.addControl(new mapboxgl.NavigationControl());
 
-        // const camera = map.getCamera();
+        // const camera = this.map.getCamera();
         // console.log(camera);
         // this.loaded = true;
       });
 
-      map.on('moveend', () => {
-        let win = window.parent;
-        win.postMessage('hi parent');
-        // let win = window.opener;
-        // win.postMessage('hi open');
-        // // let 
-        win = window;
-        win.postMessage('hi window');
-        // window.postMessage({
-        //   "center": map.getCenter(),
-        //   "zoom": map.getZoom()
-        // });
+      this.map.on('moveend', () => {
+        const center = this.map.getCenter();
+        window.parent.postMessage({
+          "latitude": center.lat,
+          "longitude": center.lng,
+          "zoom": this.map.getZoom()
+        }, 
+        '*');
       });
     },
     updateMap() {
-      let longitude = this.$route.query.lon
-      let latitude = this.$route.query.lat
-      let zoom = this.$route.query.zoom
-
-      longitude = longitude ? longitude : 0
-      latitude = latitude ? latitude : 0
-      zoom = zoom ? zoom : 1
- 
-      
-    },
-    getTemperatures() {
-      const query = this.$route.query.tbar
-      // todo handle error better here
-      const tbar = query ? query : 0
-      let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + tbar;
-      axios.get(path)
-        .then((res) => {
-          // todo structure data
-          this.temperatures = res.data.temps;
-          this.latitudes = res.data.lats;
-          this.longitudes = res.data.lons;
-          this.getGeoJSON();
-          this.initMap();
+      console.log('updating')
+      this.getTemperatures()
+        .then(() => {
+          console.log(this.data.features[0])
+          const source = this.map.getSource('temperature');
+          source.setData(this.data);
+          console.log('data was set');
         })
-        .catch((error) => {
-          console.error(error);
+        .catch(error => {
+          console.error('Error occurred while updating map:', error);
         });
     },
-  },
-  created() {
-    this.getTemperatures();
-    this.$watch(
-      () => this.$route.query,
-      (toParams, previousParams) => {
-        // todo react to route changes
-        this.updateMap();
+    async getTemperatures() {
+      const query = this.$route.query.tbar
+      // todo handle error better here
+      if (query) {
+        this.tbar = query;
       }
-    )
+      let url = window.location.origin
+      const path = url + '/api/temperature?tbar=' + this.tbar;
+
+      try {
+        const response = await axios.get(path);
+        this.temperatures = response.data.temps;
+        this.latitudes = response.data.lats;
+        this.longitudes = response.data.lons;
+        this.getGeoJSON();
+        console.log('temps gotten')
+      } catch (error) {
+        console.error('Error occurred while gathering data:', error);
+        throw error; 
+      }
+    },
+  },
+  mounted() {
+    this.getTemperatures()
+      .then(() => {
+        this.initMap();
+      })
+      .catch(error => {
+        console.error('Error occurred during the first function:', error);
+      });
+    window.addEventListener("message", (event) => {
+      if (event.origin !== "https://en-roads.climateinteractive.org") return;
+      // console.log(event.data);
+      this.tbar += event.data.tbar;
+      console.log('new tbar: ', tbar);
+      this.updateMap();
+    });
+    
   }
 }
 
