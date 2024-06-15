@@ -135,11 +135,11 @@ export default {
           // "admin-2-boundaries-bg"
         );
 
-        // const search = new MapboxSearchBox();
-        // search.accessToken = this.accessToken;
-        // search.bindMap(this.map);
-        // this.map.addControl(search);
-        // this.map.addControl(new mapboxgl.NavigationControl());
+        const search = new MapboxSearchBox();
+        search.accessToken = this.accessToken;
+        search.bindMap(this.map);
+        this.map.addControl(search);
+        this.map.addControl(new mapboxgl.NavigationControl());
 
         const popup = new mapboxgl.Popup();
         this.map.on('click', 'temperature-map', (e) => {
