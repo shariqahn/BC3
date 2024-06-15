@@ -150,17 +150,22 @@ export default {
         // const camera = this.map.getCamera();
         // console.log(camera);
         // this.loaded = true;
+
+        this.sendMapView();
       });
 
       this.map.on('moveend', () => {
-        const center = this.map.getCenter();
+        this.sendMapView();
+      });
+    },
+    sendMapView() {
+      const center = this.map.getCenter();
         window.parent.postMessage({
           "latitude": center.lat,
           "longitude": center.lng,
           "zoom": this.map.getZoom()
         }, 
         '*');
-      });
     },
     updateMap() {
       console.log('updating')
@@ -211,7 +216,7 @@ export default {
       if (isNaN(event.data.tbar)) {
         console.error('The new tbar value is non a number.');
       } else {
-        this.tbar = Number(this.tbar) + Number(event.data.tbar);
+        this.tbar = event.data.tbar;
         console.log('new tbar: ', this.tbar);
         this.updateMap();
       }
