@@ -215,7 +215,7 @@ export default {
       // console.log(event.data);
       if (isNaN(event.data.tbar)) {
         console.error('The new tbar value is non a number.');
-      } else {
+      } else if (this.tbar != event.data.tbar) {
         this.tbar = event.data.tbar;
         console.log('new tbar: ', this.tbar);
         this.updateMap();
