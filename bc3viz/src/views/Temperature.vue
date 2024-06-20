@@ -17,7 +17,8 @@ export default {
           ['rgb(254, 254, 203)', 'rgb(252, 240, 165)', 'rgb(248, 222, 127)', 'rgb(241, 195, 95)', 'rgb(235, 167, 84)', 'rgb(230, 142, 81)', 'rgb(222, 116, 79)', 'rgb(200, 89 ,74)', 'rgb(164, 70 ,66)', 'rgb(126, 59 ,52)', 'rgb(89 ,47, 35)', 'rgb(55 ,36, 19)', 'rgb(25 ,25, 0)'],
           logBase: 2,
           tbar: 0,
-          map: undefined
+          map: undefined,
+          projection: 'globe'
       }
   },
   methods: {
@@ -54,16 +55,20 @@ export default {
       let longitude = this.$route.query.lon
       let latitude = this.$route.query.lat
       let zoom = this.$route.query.zoom
+      const projection = this.$route.query.projection
 
       longitude = longitude ? longitude : 0
       latitude = latitude ? latitude : 0
       zoom = zoom ? zoom : 2
+      if (projection) {
+        this.projection = projection
+      }
       // todo add error handling to ensure in range
 
       // const 
       this.map = new mapboxgl.Map({
         container: 'map', 
-        projection: 'globe',
+        projection: projection,
         // style: 'mapbox://styles/mapbox/streets-v8', 
         style: 'mapbox://styles/mapbox/streets-v12', 
         zoom: zoom,
@@ -72,14 +77,14 @@ export default {
       });
 
       this.map.on('load', () => {
-        // const layers = this.map.getStyle().layers;
-        // // console.log(layers)
-        // for (const layer of layers) {
-        //     // console.log(layer)
-        //     if ((layer.type === 'line')) {
-        //         console.log(layer)
-        //     } 
-        // }
+        const layers = this.map.getStyle().layers;
+        // console.log(layers)
+        for (const layer of layers) {
+            // console.log(layer)
+            if ((layer.type === 'fill')) {
+                console.log(layer)
+            } 
+        }
 
         // // Remove globe halo to allow for contrast between black background and color scale
         // this.map.setFog({
@@ -167,18 +172,28 @@ export default {
         }, 
         '*');
     },
-    updateMap() {
+    updateMap(updates) {
       console.log('updating')
-      this.getTemperatures()
-        .then(() => {
-          console.log(this.data.features[0])
-          const source = this.map.getSource('temperature');
-          source.setData(this.data);
-          console.log('data was set');
-        })
-        .catch(error => {
-          console.error('Error occurred while updating map:', error);
-        });
+      if (this.tbar != updates.tbar) {
+        this.tbar = updates.tbar;
+        console.log('new tbar: ', this.tbar);
+        this.getTemperatures()
+          .then(() => {
+            console.log(this.data.features[0])
+            const source = this.map.getSource('temperature');
+            source.setData(this.data);
+            console.log('data was set');
+          })
+          .catch(error => {
+            console.error('Error occurred while updating map:', error);
+          });
+      }
+
+      if (this.projection != updates.projection) {
+        this.projection = updates.projection;
+        this.map.setProjection(this.projection);
+      }
+      
     },
     async getTemperatures() {
       let url = window.location.origin
@@ -215,10 +230,8 @@ export default {
       // console.log(event.data);
       if (isNaN(event.data.tbar)) {
         console.error('The new tbar value is non a number.');
-      } else if (this.tbar != event.data.tbar) {
-        this.tbar = event.data.tbar;
-        console.log('new tbar: ', this.tbar);
-        this.updateMap();
+      } else {
+        this.updateMap(event.data);
       }
       
     });
