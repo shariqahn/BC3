@@ -63,12 +63,13 @@ export default {
       if (projection) {
         this.projection = projection
       }
+      console.log('projection: ', this.projection)
       // todo add error handling to ensure in range
 
       // const 
       this.map = new mapboxgl.Map({
         container: 'map', 
-        projection: projection,
+        projection: this.projection,
         // style: 'mapbox://styles/mapbox/streets-v8', 
         style: 'mapbox://styles/mapbox/streets-v12', 
         zoom: zoom,
@@ -77,14 +78,14 @@ export default {
       });
 
       this.map.on('load', () => {
-        const layers = this.map.getStyle().layers;
-        // console.log(layers)
-        for (const layer of layers) {
-            // console.log(layer)
-            if ((layer.type === 'fill')) {
-                console.log(layer)
-            } 
-        }
+        // const layers = this.map.getStyle().layers;
+        // // console.log(layers)
+        // for (const layer of layers) {
+        //     console.log(layer)
+        //     // if ((layer.type === 'line')) {
+        //     //     console.log(layer)
+        //     // } 
+        // }
 
         // // Remove globe halo to allow for contrast between black background and color scale
         // this.map.setFog({
@@ -95,6 +96,16 @@ export default {
           type: 'geojson',
           data: this.data,
         });
+
+        // this.map.addLayer({
+        //   "id": "waterway-green",
+        //   "source": "mapbox-streets",
+        //   "source-layer": "waterway",
+        //   "type": "line",
+        //   "paint": {
+        //     "fill-color": "green"
+        //   }
+        // })
 
         this.map.addLayer(
           {
@@ -138,13 +149,21 @@ export default {
           // todo play w layers more
           "admin-1-boundary-bg",
           // "admin-2-boundaries-bg"
+          // didn't work:
+          // anything 'fill' type
+          // 'land-structure-line'
+          // 'waterway'
+          // 'waterway-shadow'
+          // 'pitch-outline' HERE
+          // 'aeroway-line'
+          // 'landuse'
         );
 
-        const search = new MapboxSearchBox();
-        search.accessToken = this.accessToken;
-        search.bindMap(this.map);
-        this.map.addControl(search);
-        this.map.addControl(new mapboxgl.NavigationControl());
+        // const search = new MapboxSearchBox();
+        // search.accessToken = this.accessToken;
+        // search.bindMap(this.map);
+        // this.map.addControl(search);
+        // this.map.addControl(new mapboxgl.NavigationControl());
 
         const popup = new mapboxgl.Popup();
         this.map.on('click', 'temperature-map', (e) => {
@@ -175,18 +194,22 @@ export default {
     updateMap(updates) {
       console.log('updating')
       if (this.tbar != updates.tbar) {
-        this.tbar = updates.tbar;
-        console.log('new tbar: ', this.tbar);
-        this.getTemperatures()
-          .then(() => {
-            console.log(this.data.features[0])
-            const source = this.map.getSource('temperature');
-            source.setData(this.data);
-            console.log('data was set');
-          })
-          .catch(error => {
-            console.error('Error occurred while updating map:', error);
-          });
+        if (isNaN(updates.tbar)) {
+          console.error('The new tbar value is non a number.');
+        } else {
+          this.tbar = updates.tbar;
+          console.log('new tbar: ', this.tbar);
+          this.getTemperatures()
+            .then(() => {
+              console.log(this.data.features[0])
+              const source = this.map.getSource('temperature');
+              source.setData(this.data);
+              console.log('data was set');
+            })
+            .catch(error => {
+              console.error('Error occurred while updating temperatures:', error);
+            });
+          }
       }
 
       if (this.projection != updates.projection) {
@@ -197,7 +220,11 @@ export default {
     },
     async getTemperatures() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar;
+      // const path = url + '/api/temperature?tbar=' + this.tbar;
+
+      // for local testing
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar;
 
       try {
         const response = await axios.get(path);
@@ -228,11 +255,7 @@ export default {
     window.addEventListener("message", (event) => {
       // if (event.origin !== "https://en-roads.climateinteractive.org") return;
       // console.log(event.data);
-      if (isNaN(event.data.tbar)) {
-        console.error('The new tbar value is non a number.');
-      } else {
-        this.updateMap(event.data);
-      }
+      this.updateMap(event.data);
       
     });
     
