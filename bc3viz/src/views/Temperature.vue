@@ -212,7 +212,7 @@ export default {
           }
       }
 
-      if (this.projection != updates.projection) {
+      if(updates.projection && (this.projection != updates.projection)) {
         this.projection = updates.projection;
         this.map.setProjection(this.projection);
       }
@@ -220,11 +220,11 @@ export default {
     },
     async getTemperatures() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar;
+      // const path = url + '/api/temperature?tbar=' + this.tbar;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar;
 
       try {
         const response = await axios.get(path);
