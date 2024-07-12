@@ -50,7 +50,6 @@ export default {
       })
     },
     initMap() {
-      console.log('init');
       mapboxgl.accessToken = this.accessToken;
       let longitude = this.$route.query.lon
       let latitude = this.$route.query.lat
@@ -66,25 +65,27 @@ export default {
       console.log('projection: ', this.projection)
       // todo add error handling to ensure in range
 
-      // const 
       this.map = new mapboxgl.Map({
         container: 'map', 
         projection: this.projection,
         // style: 'mapbox://styles/mapbox/streets-v8', 
         style: 'mapbox://styles/mapbox/streets-v12', 
+        // style: 'mapbox://styles/mapbox/light-v11', // style URL for Mapbox Light
         zoom: zoom,
-        maxZoom: 7,
+        // maxZoom: 7,
         center: [longitude, latitude]
       });
 
       this.map.on('load', () => {
         // const layers = this.map.getStyle().layers;
-        // // console.log(layers)
         // for (const layer of layers) {
-        //     console.log(layer)
-        //     // if ((layer.type === 'line')) {
-        //     //     console.log(layer)
-        //     // } 
+        //     // console.log(layer)
+        //     if ((layer.type === 'line')) {
+        //         console.log(layer)
+        //     } 
+        //     // if ((layer.id === 'admin-0-boundary') || (layer.id === 'admin-0-boundary-bg')) {
+        //     //   console.log(layer)
+        //     // }
         // }
 
         // // Remove globe halo to allow for contrast between black background and color scale
@@ -96,16 +97,6 @@ export default {
           type: 'geojson',
           data: this.data,
         });
-
-        // this.map.addLayer({
-        //   "id": "waterway-green",
-        //   "source": "mapbox-streets",
-        //   "source-layer": "waterway",
-        //   "type": "line",
-        //   "paint": {
-        //     "fill-color": "green"
-        //   }
-        // })
 
         this.map.addLayer(
           {
@@ -146,19 +137,34 @@ export default {
                   ],
               }
           },
-          // todo play w layers more
           "admin-1-boundary-bg",
-          // "admin-2-boundaries-bg"
-          // didn't work:
-          // anything 'fill' type
-          // 'land-structure-line'
-          // 'waterway'
-          // 'waterway-shadow'
-          // 'pitch-outline' HERE
-          // 'aeroway-line'
-          // 'landuse'
         );
 
+        // Add coastline layer as an outline of water fill layer
+        this.map.addLayer({
+            id: 'coastline',
+            type: 'line',
+            source: {
+                type: 'vector',
+                url: 'mapbox://mapbox.mapbox-streets-v8'
+            },
+            'source-layer': 'water', // Use the same source layer as fill layer
+            paint: this.getPaintProperties('admin-0-boundary')
+        });
+
+        // Add coastline layer as a background to the coastline
+        // to match admin boundary styling
+        this.map.addLayer({
+            id: 'coastline-bg',
+            type: 'line',
+            source: {
+                type: 'vector',
+                url: 'mapbox://mapbox.mapbox-streets-v8'
+            },
+            'source-layer': 'water', // Use the same source layer as fill layer
+            paint: this.getPaintProperties('admin-0-boundary-bg')
+        });
+        
         // const search = new MapboxSearchBox();
         // search.accessToken = this.accessToken;
         // search.bindMap(this.map);
@@ -171,16 +177,13 @@ export default {
             popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &degC').addTo(this.map);
         });
 
-        // const camera = this.map.getCamera();
-        // console.log(camera);
-        // this.loaded = true;
-
         this.sendMapView();
       });
-
+      
       this.map.on('moveend', () => {
         this.sendMapView();
       });
+
     },
     sendMapView() {
       const center = this.map.getCenter();
@@ -220,11 +223,11 @@ export default {
     },
     async getTemperatures() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar;
+      // const path = url + '/api/temperature?tbar=' + this.tbar;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar;
 
       try {
         const response = await axios.get(path);
@@ -238,6 +241,18 @@ export default {
         throw error; 
       }
     },
+    getPaintProperties(layerName) {
+      const sourcePaint = JSON.parse(JSON.stringify(this.map.getLayer(layerName).paint));
+      const properties = Object.keys(sourcePaint._values);
+      const paint = {};
+      for (let property of properties) {
+        // line-floorwidth is in the layer data but not supported when you try to get the property
+        if (property != 'line-floorwidth') { 
+          paint[property] = this.map.getPaintProperty(layerName, property);
+        }
+      }
+      return paint;
+    }
   },
   mounted() {
     const query = this.$route.query.tbar
@@ -252,12 +267,12 @@ export default {
       .catch(error => {
         console.error('Error occurred during the first function:', error);
       });
-    window.addEventListener("message", (event) => {
-      // if (event.origin !== "https://en-roads.climateinteractive.org") return;
-      // console.log(event.data);
-      this.updateMap(event.data);
+    // window.addEventListener("message", (event) => {
+    //   // if (event.origin !== "https://en-roads.climateinteractive.org") return;
+    //   // console.log(event.data);
+    //   this.updateMap(event.data);
       
-    });
+    // });
     
   }
 }
