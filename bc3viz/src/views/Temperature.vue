@@ -169,11 +169,16 @@ export default {
         // search.accessToken = this.accessToken;
         // search.bindMap(this.map);
         // this.map.addControl(search);
-        // this.map.addControl(new mapboxgl.NavigationControl());
+        this.map.addControl(new mapboxgl.NavigationControl());
 
         const popup = new mapboxgl.Popup();
         this.map.on('click', 'temperature-map', (e) => {
-            const temperature = e.features[0].properties.temperature.toFixed(1)
+            let temperature = e.features[0].properties.temperature
+            if (temperature < 10) {
+              temperature = temperature.toFixed(1)
+            } else {
+              temperature = Math.round(temperature)
+            }
             popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &degC').addTo(this.map);
         });
 
