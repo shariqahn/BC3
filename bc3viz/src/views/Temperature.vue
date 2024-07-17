@@ -255,7 +255,10 @@ export default {
   mounted() {
     // todo handle error better here
     const tbar = this.$route.query.tbar
-    const unit = this.$route.query.temperature_unit
+    const unit = this.$route.query.temperature_unit.toUpperCase();
+    if (unit && (unit != 'F') && (unit != 'C')) {
+      console.error('Temperature unit can be either C or F.');
+    }
     this.tbar = tbar ? tbar : 0;
     this.unit = unit ? unit : 'C';
 
