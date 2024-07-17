@@ -12,13 +12,14 @@ export default {
           longitudes: [],
           data: {},
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
-          colorScale: 
-          // IPCC
-          ['rgb(254, 254, 203)', 'rgb(252, 240, 165)', 'rgb(248, 222, 127)', 'rgb(241, 195, 95)', 'rgb(235, 167, 84)', 'rgb(230, 142, 81)', 'rgb(222, 116, 79)', 'rgb(200, 89 ,74)', 'rgb(164, 70 ,66)', 'rgb(126, 59 ,52)', 'rgb(89 ,47, 35)', 'rgb(55 ,36, 19)', 'rgb(25 ,25, 0)'],
+          // colors from IPCC: https://www.ipcc.ch/site/assets/uploads/2022/09/IPCC_AR6_WGI_VisualStyleGuide_2022.pdf#page=13
+          celsiusScale: ['rgb(254, 254, 203)', 'rgb(252, 240, 165)', 'rgb(248, 222, 127)', 'rgb(241, 195, 95)', 'rgb(235, 167, 84)', 'rgb(230, 142, 81)', 'rgb(222, 116, 79)', 'rgb(200, 89 ,74)', 'rgb(164, 70 ,66)', 'rgb(126, 59 ,52)', 'rgb(89 ,47, 35)', 'rgb(55 ,36, 19)', 'rgb(25 ,25, 0)'],
+          fahrenheitScale: ['rgb(254, 254, 203)', 'rgb(251, 237, 158)', 'rgb(245, 212, 112)', 'rgb(238, 178, 87)', 'rgb(231, 147, 82)', 'rgb(222, 116, 79)', 'rgb(194, 84, 73)', 'rgb(149, 65, 61)', 'rgb(104, 52, 42)', 'rgb(62, 38, 22)', 'rgb(25, 25, 0)'],
           logBase: 2,
-          tbar: 0,
+          tbar: undefined,
           map: undefined,
-          projection: 'globe'
+          projection: 'globe',
+          unit: undefined
       }
   },
   methods: {
@@ -41,9 +42,13 @@ export default {
               "coordinates": polygon
             },
             "properties": {
-              'temperature': temperature,
               'center': [longitude, latitude]
             }
+          }
+          if (this.unit == 'C') {
+            feature.properties.temperature = temperature;
+          } else {
+            feature.properties.temperature = this.toFahrenheit(temperature);
           }
           this.data.features.push(feature)
         })
@@ -98,43 +103,28 @@ export default {
           data: this.data,
         });
 
+        const fillColor = [
+          'interpolate',
+          ['linear'],
+          ['get', 'temperature']
+        ];
+        if (this.unit == 'C') {
+          for (let i = 0; i < this.celsiusScale.length; i++) {
+            fillColor.push(...[i*.5, this.celsiusScale[i]]);
+          }
+        } else {
+          for (let i = 0; i < this.fahrenheitScale.length; i++) {
+            fillColor.push(...[i, this.fahrenheitScale[i]]);
+          }
+        }
+
         this.map.addLayer(
           {
               'id': 'temperature-map',
               'source': 'temperature',
               'type': 'fill',
               'paint': {
-                  'fill-color': [
-                      'interpolate',
-                      ['linear'],
-                      ['get', 'temperature'],
-                      0,
-                      this.colorScale[0],
-                      .5,
-                      this.colorScale[1],
-                      1,
-                      this.colorScale[2],
-                      1.5,
-                      this.colorScale[3],
-                      2,
-                      this.colorScale[4],
-                      2.5,
-                      this.colorScale[5],
-                      3,
-                      this.colorScale[6],
-                      3.5,
-                      this.colorScale[7],
-                      4,
-                      this.colorScale[8],
-                      4.5,
-                      this.colorScale[9],
-                      5,
-                      this.colorScale[10],
-                      5.5,
-                      this.colorScale[11],
-                      6,
-                      this.colorScale[12],
-                  ],
+                  'fill-color': fillColor,
               }
           },
           "admin-1-boundary-bg",
@@ -173,13 +163,13 @@ export default {
 
         const popup = new mapboxgl.Popup();
         this.map.on('click', 'temperature-map', (e) => {
-            let temperature = e.features[0].properties.temperature
+            let temperature = e.features[0].properties.temperature;
             if (temperature < 10) {
               temperature = temperature.toFixed(1)
             } else {
               temperature = Math.round(temperature)
             }
-            popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &degC').addTo(this.map);
+            popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &deg' + this.unit).addTo(this.map);
         });
 
         this.sendMapView();
@@ -228,11 +218,11 @@ export default {
     },
     async getTemperatures() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar;
+      // const path = url + '/api/temperature?tbar=' + this.tbar;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar;
 
       try {
         const response = await axios.get(path);
@@ -257,14 +247,18 @@ export default {
         }
       }
       return paint;
+    },
+    toFahrenheit(celsius) {
+      return celsius * 9 / 5;
     }
   },
   mounted() {
-    const query = this.$route.query.tbar
     // todo handle error better here
-    if (query) {
-      this.tbar = query;
-    }
+    const tbar = this.$route.query.tbar
+    const unit = this.$route.query.temperature_unit
+    this.tbar = tbar ? tbar : 0;
+    this.unit = unit ? unit : 'C';
+
     this.getTemperatures()
       .then(() => {
         this.initMap();
@@ -288,14 +282,23 @@ export default {
   <div id="map"></div>
   <!-- todo move to new component -->
   <div class='my-legend'>
-  <div class='legend-title'>Temperature Increase (&degC)</div>
+  <div class='legend-title'>Temperature Increase (&deg{{ unit }})</div>
   <div class='legend-scale'>
     <ul class='legend-labels'>
-      <li><span :style="{background: colorScale[0]}"></span>0</li>
-      <li v-for="n in colorScale.length-2">
-        <span :style="{background: colorScale[n]}"></span>{{.5*n}}
-      </li>
-      <li><span :style="{background: colorScale[colorScale.length-1]}"></span>{{.5*(colorScale.length-1)}}+</li>
+      <div v-if="unit == 'C'">
+        <li><span :style="{background: celsiusScale[0]}"></span>0</li>
+        <li v-for="n in celsiusScale.length-2">
+          <span :style="{background: celsiusScale[n]}"></span>{{.5*n}}
+        </li>
+        <li><span :style="{background: celsiusScale[celsiusScale.length-1]}"></span>{{.5*(celsiusScale.length-1)}}+</li>
+      </div>
+      <div v-else>
+        <li><span :style="{background: fahrenheitScale[0]}"></span>0</li>
+        <li v-for="n in fahrenheitScale.length-2">
+          <span :style="{background: fahrenheitScale[n]}"></span>{{ n }}
+        </li>
+        <li><span :style="{background: fahrenheitScale[fahrenheitScale.length-1]}"></span>{{ (fahrenheitScale.length-1) }}+</li>
+      </div>
     </ul>
   </div>
   </div>
