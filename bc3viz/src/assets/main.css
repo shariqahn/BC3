@@ -38,3 +38,34 @@ a,
   padding: 18px !important;
   font-size: 56px;
 }
+
+.loader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: fixed;
+  height: 100vh;
+  width: 100%;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+
+  background: rgb(215, 226, 230);
+  transition: opacity 0.5s linear;
+
+}
+
+.loader {
+  border: 12px solid #f3f3f3;
+  border-top: 12px solid grey;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

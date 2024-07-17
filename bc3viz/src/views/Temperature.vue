@@ -19,7 +19,8 @@ export default {
           tbar: undefined,
           map: undefined,
           projection: 'globe',
-          unit: undefined
+          unit: undefined,
+          loading: true
       }
   },
   methods: {
@@ -67,7 +68,6 @@ export default {
       if (projection) {
         this.projection = projection
       }
-      console.log('projection: ', this.projection)
       // todo add error handling to ensure in range
 
       this.map = new mapboxgl.Map({
@@ -179,6 +179,10 @@ export default {
         this.sendMapView();
       });
 
+      this.map.on('idle', () => {
+        console.log('loaded');
+        this.loading = false;
+      });
     },
     sendMapView() {
       const center = this.map.getCenter();
@@ -255,12 +259,18 @@ export default {
   mounted() {
     // todo handle error better here
     const tbar = this.$route.query.tbar
-    const unit = this.$route.query.temperature_unit.toUpperCase();
-    if (unit && (unit != 'F') && (unit != 'C')) {
-      console.error('Temperature unit can be either C or F.');
-    }
     this.tbar = tbar ? tbar : 0;
-    this.unit = unit ? unit : 'C';
+
+    let unit = this.$route.query.temperature_unit;
+    if (unit) {
+      unit = unit.toUpperCase();
+      if ((unit != 'F') && (unit != 'C')) {
+        console.error('Temperature unit can be either C or F.');
+      }
+    } else {
+      unit = 'C';
+    }
+    this.unit = unit;
 
     this.getTemperatures()
       .then(() => {
@@ -269,12 +279,12 @@ export default {
       .catch(error => {
         console.error('Error occurred during the first function:', error);
       });
-    // window.addEventListener("message", (event) => {
-    //   // if (event.origin !== "https://en-roads.climateinteractive.org") return;
-    //   // console.log(event.data);
-    //   this.updateMap(event.data);
+    window.addEventListener("message", (event) => {
+      // if (event.origin !== "https://en-roads.climateinteractive.org") return;
+      // console.log(event.data);
+      this.updateMap(event.data);
       
-    // });
+    });
     
   }
 }
@@ -282,7 +292,12 @@ export default {
 </script>
 
 <template>
+  <div v-if="loading" class="loader-container">
+    <div class="loader"></div>
+  </div>
+
   <div id="map"></div>
+
   <!-- todo move to new component -->
   <div class='my-legend'>
   <div class='legend-title'>Temperature Increase (&deg{{ unit }})</div>
@@ -368,7 +383,7 @@ export default {
   }
 
 .my-legend {
-  z-index: 1;
+  z-index: 2;
   bottom: 35px;
   right: 15px;
   position: absolute;
@@ -381,11 +396,5 @@ export default {
   border-radius: 5px;
   border-width: 1px;
 }
-
-/* @media (prefers-color-scheme: dark) {
-  .my-legend {
-    background-color: #181818;
-  }
-} */
 
 </style>
