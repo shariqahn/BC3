@@ -310,7 +310,8 @@ export default {
         console.error('Error occurred during the first function:', error);
       });
     window.addEventListener("message", (event) => {
-      if (event.origin !== "https://en-roads.climateinteractive.org") return;
+      // if (event.origin !== "https://en-roads.climateinteractive.org") return;
+      // if (event.origin !== "https://en-roads.dev.climateinteractive.org") return;
       this.updateMap(event.data);
       
     });
