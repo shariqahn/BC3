@@ -231,10 +231,8 @@ export default {
           console.log('new tbar: ', this.tbar);
           this.getTemperatures()
             .then(() => {
-              console.log(this.data.features[0])
               const source = this.map.getSource('temperature');
               source.setData(this.data);
-              console.log('data was set');
             })
             .catch(error => {
               console.error('Error occurred while updating temperatures:', error);
