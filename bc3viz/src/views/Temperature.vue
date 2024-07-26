@@ -2,7 +2,9 @@
 import axios from 'axios';
 import mapboxgl from "mapbox-gl";
 import "../../node_modules/mapbox-gl/dist/mapbox-gl.css"
-import { MapboxSearchBox } from "@mapbox/search-js-web"
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import coastlineData from '../assets/ne_50m_coastline.json';
 
 export default {
   data() {
@@ -20,7 +22,11 @@ export default {
           map: undefined,
           projection: 'globe',
           unit: undefined,
-          loading: true
+          loading: true,
+          start: undefined,
+          dataTime: undefined,
+          renderTime: undefined,
+          count: 0
       }
   },
   methods: {
@@ -35,7 +41,7 @@ export default {
           const latitude = this.latitudes[i]
           const longitude = this.longitudes[j]
 
-          const polygon = [[[longitude-.5, latitude-.5], [longitude-.5, latitude+.5], [longitude+.5, latitude+.5], [longitude+.5, latitude-.5], [longitude-.5, latitude-.5]]]
+          const polygon = [[[longitude-1, latitude-1], [longitude-1, latitude+1], [longitude+1, latitude+1], [longitude+1, latitude-1], [longitude-1, latitude-1]]]
           const feature = {
             "type": "Feature",
             "geometry": {
@@ -74,23 +80,45 @@ export default {
         container: 'map', 
         projection: this.projection,
         // style: 'mapbox://styles/mapbox/streets-v8', 
-        style: 'mapbox://styles/mapbox/streets-v12', 
+        // style: 'mapbox://styles/shariqah/clz1y4dvk02ae01p9697g9k2o',
+        style: 'mapbox://styles/mapbox/streets-v12?optimize=true',
+        // ?optimize=true', //adding optimize=true didnt seem to hlep anything
         // style: 'mapbox://styles/mapbox/light-v11', // style URL for Mapbox Light
         zoom: zoom,
         // maxZoom: 7,
         center: [longitude, latitude]
       });
 
+      // // Log tile loading events
+      // this.map.on('sourcedata', (e) => {
+      //   console.log('Source data event:', e);
+      //   this.count = this.count +1;
+      //   console.log(this.count);
+      // });
+
+      // this.map.on('styledata', (e) => {
+      //   console.log('style data event:', e);
+      // });
+//       this.map.on('style.import.load', () => {
+//     console.log('A style load event occurred.');
+// });
+
+      // // Example: Log when tiles are loaded
+      // this.map.on('tile.load', (e) => {
+      //   console.log('Tile loaded:', e.tile);
+      // });
+
       this.map.on('load', () => {
+        
         // const layers = this.map.getStyle().layers;
         // for (const layer of layers) {
         //     // console.log(layer)
-        //     if ((layer.type === 'line')) {
-        //         console.log(layer)
-        //     } 
-        //     // if ((layer.id === 'admin-0-boundary') || (layer.id === 'admin-0-boundary-bg')) {
-        //     //   console.log(layer)
-        //     // }
+        //     // if ((layer.type === 'line')) {
+        //     //     console.log(layer)
+        //     // } 
+        //     if ((layer.id === 'water')) {
+        //       console.log(layer)
+        //     }
         // }
 
         // // Remove globe halo to allow for contrast between black background and color scale
@@ -130,16 +158,10 @@ export default {
           "admin-1-boundary-bg",
         );
 
-        // Add coastline layer as an outline of water fill layer
-        this.map.addLayer({
-            id: 'coastline',
-            type: 'line',
-            source: {
-                type: 'vector',
-                url: 'mapbox://mapbox.mapbox-streets-v8'
-            },
-            'source-layer': 'water', // Use the same source layer as fill layer
-            paint: this.getPaintProperties('admin-0-boundary')
+        const coastlineStart = Date.now();
+        this.map.addSource('coastlines', {
+          type: 'geojson',
+          data: coastlineData,
         });
 
         // Add coastline layer as a background to the coastline
@@ -147,18 +169,24 @@ export default {
         this.map.addLayer({
             id: 'coastline-bg',
             type: 'line',
-            source: {
-                type: 'vector',
-                url: 'mapbox://mapbox.mapbox-streets-v8'
-            },
-            'source-layer': 'water', // Use the same source layer as fill layer
+            source: 'coastlines',
             paint: this.getPaintProperties('admin-0-boundary-bg')
         });
-        
-        // const search = new MapboxSearchBox();
-        // search.accessToken = this.accessToken;
-        // search.bindMap(this.map);
-        // this.map.addControl(search);
+
+        // Add coastline layer as an outline of water fill layer
+        this.map.addLayer({
+            id: 'coastline',
+            type: 'line',
+            source: 'coastlines',
+            paint: this.getPaintProperties('admin-0-boundary')
+        });
+        // console.log(`coast time: ${Date.now() - coastlineStart} ms`);
+
+        const geocoder = new MapboxGeocoder({
+            accessToken: this.accessToken,
+            mapboxgl: mapboxgl
+        })
+        this.map.addControl(geocoder);
         this.map.addControl(new mapboxgl.NavigationControl());
 
         const popup = new mapboxgl.Popup();
@@ -180,7 +208,8 @@ export default {
       });
 
       this.map.on('idle', () => {
-        console.log('loaded');
+        const end = Date.now();
+        // console.log(`Render time: ${end - this.dataTime} ms`);
         this.loading = false;
       });
     },
@@ -194,7 +223,6 @@ export default {
         '*');
     },
     updateMap(updates) {
-      console.log('updating')
       if (this.tbar != updates.tbar) {
         if (isNaN(updates.tbar)) {
           console.error('The new tbar value is non a number.');
@@ -234,7 +262,6 @@ export default {
         this.latitudes = response.data.lats;
         this.longitudes = response.data.lons;
         this.getGeoJSON();
-        console.log('temps gotten')
       } catch (error) {
         console.error('Error occurred while gathering data:', error);
         throw error; 
@@ -272,16 +299,18 @@ export default {
     }
     this.unit = unit;
 
+    this.start = Date.now();
     this.getTemperatures()
       .then(() => {
+        this.dataTime = Date.now();
+        // console.log(`Data time: ${this.dataTime - this.start} ms`);
         this.initMap();
       })
       .catch(error => {
         console.error('Error occurred during the first function:', error);
       });
     window.addEventListener("message", (event) => {
-      // if (event.origin !== "https://en-roads.climateinteractive.org") return;
-      // console.log(event.data);
+      if (event.origin !== "https://en-roads.climateinteractive.org") return;
       this.updateMap(event.data);
       
     });
@@ -349,7 +378,6 @@ export default {
   padding: 0;
   float: left;
   list-style: none;
-  /* -webkit-text-stroke-color: white; */
 
   }
 .my-legend .legend-scale ul li {
@@ -360,8 +388,6 @@ export default {
   text-align: center;
   font-size: 80%;
   list-style: none;
-  /* -webkit-text-stroke-color: white;
-  -webkit-text-stroke-width: .2px; */
 
   }
 .my-legend ul.legend-labels li span {
@@ -369,15 +395,9 @@ export default {
   float: left;
   height: 15px;
   width: 30px;
-  /* -webkit-text-stroke-color: white;
-  -webkit-text-stroke-width: 3px; */
 
   }
-/* .my-legend .legend-source {
-  font-size: 70%;
-  color: #999;
-  clear: both;
-  } */
+  
 .my-legend a {
   color: #777;
   }

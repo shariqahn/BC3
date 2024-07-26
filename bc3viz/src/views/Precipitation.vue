@@ -31,7 +31,7 @@ export default {
           const latitude = this.latitudes[i]
           const longitude = this.longitudes[j]
 
-          const polygon = [[[longitude-.5, latitude-.5], [longitude-.5, latitude+.5], [longitude+.5, latitude+.5], [longitude+.5, latitude-.5], [longitude-.5, latitude-.5]]]
+          const polygon = [[[longitude-1, latitude-1], [longitude-1, latitude+1], [longitude+1, latitude+1], [longitude+1, latitude-1], [longitude-1, latitude-1]]]
           const feature = {
             "type": "Feature",
             "geometry": {
@@ -135,8 +135,12 @@ export default {
       // todo handle error better here
       const tbar = query ? query : 0
       let url = window.location.origin
-      //url = url.slice(0, url.lastIndexOf(":"))
-      const path = url + '/api/precipitation?tbar=' + tbar;
+
+      // for local testing
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/precipitation?tbar=' + tbar;
+
+      // const path = url + '/api/precipitation?tbar=' + tbar;
       axios.get(path)
         .then((res) => {
           // todo structure data

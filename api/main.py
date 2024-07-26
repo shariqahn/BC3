@@ -48,7 +48,7 @@ CORS(app)
 @app.route('/temperature')
 def get_temperature():
     # try: 
-    filename = 'PatternScalingCoefficients_tas_ssp245-ssp370__Spatial_Regridded.nc'
+    filename = 'PatternScalingCoefficients_tas_ssp245-ssp370__r180x90.nc'
     tbar              = float(request.args.get('tbar', 0))
     flat, flon, ftemp, _, _ = patternscaling( tbar, filename )
     
@@ -65,7 +65,7 @@ def get_temperature():
 @app.route('/precipitation')
 def get_precipitation():
     # try: 
-    filename = 'PatternScalingCoefficients_pr_ssp245-ssp370__Spatial_Regridded.nc'
+    filename = 'PatternScalingCoefficients_pr_ssp245-ssp370__r180x90.nc'
     tbar              = float(request.args.get('tbar', 0))
     flat, flon, fprecipitation, fprel, _  = patternscaling( tbar, filename )
     print('lat', flat)

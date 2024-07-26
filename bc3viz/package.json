@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.2",
+    "@mapbox/mapbox-gl-geocoder": "^5.0.2",
     "@mapbox/search-js-web": "^1.0.0-beta.18",
     "axios": "^1.6.4",
     "chroma-js": "^2.4.2",
