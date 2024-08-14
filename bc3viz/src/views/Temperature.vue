@@ -4,7 +4,7 @@ import mapboxgl from "mapbox-gl";
 import "../../node_modules/mapbox-gl/dist/mapbox-gl.css"
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import coastlineData from '../assets/ne_50m_coastline.json';
+import coastlineData from '../assets/ne_10m_coastline.json';
 
 export default {
   data() {
@@ -26,7 +26,9 @@ export default {
           start: undefined,
           dataTime: undefined,
           renderTime: undefined,
-          count: 0
+          count: 0,
+          fillColor: [],
+          resolution: undefined
       }
   },
   methods: {
@@ -41,7 +43,17 @@ export default {
           const latitude = this.latitudes[i]
           const longitude = this.longitudes[j]
 
-          const polygon = [[[longitude-1, latitude-1], [longitude-1, latitude+1], [longitude+1, latitude+1], [longitude+1, latitude-1], [longitude-1, latitude-1]]]
+          let polygon;
+          if (this.resolution == 1.5) {
+              // 4s
+              polygon = [[[longitude-.75, latitude-.75], [longitude-.75, latitude+.75], [longitude+.75, latitude+.75], [longitude+.75, latitude-.75], [longitude-.75, latitude-.75]]]
+          } else if (this.resolution == 2) {
+              polygon = [[[longitude-1, latitude-1], [longitude-1, latitude+1], [longitude+1, latitude+1], [longitude+1, latitude-1], [longitude-1, latitude-1]]]
+          }  else { // 1-degree
+              //     5.5s
+              polygon = [[[longitude-.5, latitude-.5], [longitude-.5, latitude+.5], [longitude+.5, latitude+.5], [longitude+.5, latitude-.5], [longitude-.5, latitude-.5]]]
+           } 
+          
           const feature = {
             "type": "Feature",
             "geometry": {
@@ -80,8 +92,9 @@ export default {
         container: 'map', 
         projection: this.projection,
         // style: 'mapbox://styles/mapbox/streets-v8', 
-        // style: 'mapbox://styles/shariqah/clz1y4dvk02ae01p9697g9k2o',
-        style: 'mapbox://styles/mapbox/streets-v12?optimize=true',
+        // style: 'mapbox://styles/shariqah/clz1y4dvk02ae01p9697g9k2o/draft',
+        style: 'mapbox://styles/shariqah/clzfw8mfr00cj01qp3qmc1ypy/draft', // takes about 1.2s to render without coastline; 1.4 with
+        // style: 'mapbox://styles/mapbox/streets-v12?optimize=true', // takes about 2s to render without coastline; 2.4 wiht
         // ?optimize=true', //adding optimize=true didnt seem to hlep anything
         // style: 'mapbox://styles/mapbox/light-v11', // style URL for Mapbox Light
         zoom: zoom,
@@ -131,55 +144,40 @@ export default {
           data: this.data,
         });
 
-        const fillColor = [
-          'interpolate',
-          ['linear'],
-          ['get', 'temperature']
-        ];
-        if (this.unit == 'C') {
-          for (let i = 0; i < this.celsiusScale.length; i++) {
-            fillColor.push(...[i*.5, this.celsiusScale[i]]);
-          }
-        } else {
-          for (let i = 0; i < this.fahrenheitScale.length; i++) {
-            fillColor.push(...[i, this.fahrenheitScale[i]]);
-          }
-        }
-
         this.map.addLayer(
           {
               'id': 'temperature-map',
               'source': 'temperature',
               'type': 'fill',
               'paint': {
-                  'fill-color': fillColor,
+                  'fill-color': this.fillColor,
               }
           },
           "admin-1-boundary-bg",
         );
 
-        const coastlineStart = Date.now();
-        this.map.addSource('coastlines', {
-          type: 'geojson',
-          data: coastlineData,
-        });
+        // const coastlineStart = Date.now();
+        // this.map.addSource('coastlines', {
+        //   type: 'geojson',
+        //   data: coastlineData,
+        // });
 
-        // Add coastline layer as a background to the coastline
-        // to match admin boundary styling
-        this.map.addLayer({
-            id: 'coastline-bg',
-            type: 'line',
-            source: 'coastlines',
-            paint: this.getPaintProperties('admin-0-boundary-bg')
-        });
+        // // Add coastline layer as a background to the coastline
+        // // to match admin boundary styling
+        // this.map.addLayer({
+        //     id: 'coastline-bg',
+        //     type: 'line',
+        //     source: 'coastlines',
+        //     paint: this.getPaintProperties('admin-0-boundary-bg')
+        // });
 
-        // Add coastline layer as an outline of water fill layer
-        this.map.addLayer({
-            id: 'coastline',
-            type: 'line',
-            source: 'coastlines',
-            paint: this.getPaintProperties('admin-0-boundary')
-        });
+        // // Add coastline layer as an outline of water fill layer
+        // this.map.addLayer({
+        //     id: 'coastline',
+        //     type: 'line',
+        //     source: 'coastlines',
+        //     paint: this.getPaintProperties('admin-0-boundary')
+        // });
         // console.log(`coast time: ${Date.now() - coastlineStart} ms`);
 
         const geocoder = new MapboxGeocoder({
@@ -209,7 +207,7 @@ export default {
 
       this.map.on('idle', () => {
         const end = Date.now();
-        // console.log(`Render time: ${end - this.dataTime} ms`);
+        console.log(`Render time: ${end - this.dataTime} ms`);
         this.loading = false;
       });
     },
@@ -252,7 +250,7 @@ export default {
 
       // for local testing
       // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar;
+      // const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       try {
         const response = await axios.get(path);
@@ -285,6 +283,8 @@ export default {
     // todo handle error better here
     const tbar = this.$route.query.tbar
     this.tbar = tbar ? tbar : 0;
+    const resolution = this.$route.query.resolution
+    this.resolution = resolution ? resolution : 1.5;
 
     let unit = this.$route.query.temperature_unit;
     if (unit) {
@@ -297,7 +297,22 @@ export default {
     }
     this.unit = unit;
 
-    this.start = Date.now();
+    this.fillColor = [
+      'interpolate',
+      ['linear'],
+      ['get', 'temperature']
+    ];
+    if (this.unit == 'C') {
+      for (let i = 0; i < this.celsiusScale.length; i++) {
+        this.fillColor.push(...[i*.5, this.celsiusScale[i]]);
+      }
+    } else {
+      for (let i = 0; i < this.fahrenheitScale.length; i++) {
+        this.fillColor.push(...[i, this.fahrenheitScale[i]]);
+      }
+    }
+
+    // this.start = Date.now();
     this.getTemperatures()
       .then(() => {
         this.dataTime = Date.now();
