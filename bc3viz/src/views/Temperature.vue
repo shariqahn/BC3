@@ -4,7 +4,6 @@ import mapboxgl from "mapbox-gl";
 import "../../node_modules/mapbox-gl/dist/mapbox-gl.css"
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import coastlineData from '../assets/ne_10m_coastline.json';
 
 export default {
   data() {
@@ -92,26 +91,26 @@ export default {
         container: 'map', 
         projection: this.projection,
         // style: 'mapbox://styles/mapbox/streets-v8', 
-        // style: 'mapbox://styles/shariqah/clz1y4dvk02ae01p9697g9k2o/draft',
+        // style: 'mapbox://styles/shariqah/clz1y4dvk02ae01p9697g9k2o/draft', // using coastline data is ~9s as opposed to mapbox countires data (~6s)
         style: 'mapbox://styles/shariqah/clzfw8mfr00cj01qp3qmc1ypy/draft', // takes about 1.2s to render without coastline; 1.4 with
         // style: 'mapbox://styles/mapbox/streets-v12?optimize=true', // takes about 2s to render without coastline; 2.4 wiht
         // ?optimize=true', //adding optimize=true didnt seem to hlep anything
         // style: 'mapbox://styles/mapbox/light-v11', // style URL for Mapbox Light
         zoom: zoom,
-        // maxZoom: 7,
+        maxZoom: 7,
         center: [longitude, latitude]
       });
 
-      // // Log tile loading events
-      // this.map.on('sourcedata', (e) => {
-      //   console.log('Source data event:', e);
-      //   this.count = this.count +1;
-      //   console.log(this.count);
-      // });
+//       // Log tile loading events
+//       this.map.on('sourcedata', (e) => {
+//         console.log('Source data event:', e);
+//         this.count = this.count +1;
+//         console.log(this.count);
+//       });
 
-      // this.map.on('styledata', (e) => {
-      //   console.log('style data event:', e);
-      // });
+//       this.map.on('styledata', (e) => {
+//         console.log('style data event:', e);
+//       });
 //       this.map.on('style.import.load', () => {
 //     console.log('A style load event occurred.');
 // });
@@ -153,32 +152,8 @@ export default {
                   'fill-color': this.fillColor,
               }
           },
-          "admin-1-boundary-bg",
+          "countries-bg"
         );
-
-        // const coastlineStart = Date.now();
-        // this.map.addSource('coastlines', {
-        //   type: 'geojson',
-        //   data: coastlineData,
-        // });
-
-        // // Add coastline layer as a background to the coastline
-        // // to match admin boundary styling
-        // this.map.addLayer({
-        //     id: 'coastline-bg',
-        //     type: 'line',
-        //     source: 'coastlines',
-        //     paint: this.getPaintProperties('admin-0-boundary-bg')
-        // });
-
-        // // Add coastline layer as an outline of water fill layer
-        // this.map.addLayer({
-        //     id: 'coastline',
-        //     type: 'line',
-        //     source: 'coastlines',
-        //     paint: this.getPaintProperties('admin-0-boundary')
-        // });
-        // console.log(`coast time: ${Date.now() - coastlineStart} ms`);
 
         const geocoder = new MapboxGeocoder({
             accessToken: this.accessToken,
