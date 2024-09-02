@@ -243,7 +243,8 @@ export default {
       if ((updates.longitude != center.lng) || (updates.latitude != center.lat) || 
         (updates.zoom != this.map.getZoom()) || (updates.bearing != this.map.getBearing()) || (updates.pitch != this.map.getPitch())) {
           let position = {
-            "center": [updates.longitude, updates.latitude],
+            // "center": [updates.longitude, updates.latitude],
+            "center": [updates.lon, updates.lat],
             "zoom": updates.zoom,
             "bearing": updates.bearing,
             "pitch": updates.pitch
@@ -342,6 +343,7 @@ export default {
     window.addEventListener("message", (event) => {
       // if (event.origin !== "https://en-roads.climateinteractive.org") return;
       // if (event.origin !== "https://en-roads.dev.climateinteractive.org") return;
+      console.log('received: ', event);
       this.updateMap(event.data);
       
     });
