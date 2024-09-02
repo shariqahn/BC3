@@ -246,8 +246,8 @@ export default {
             // "center": [updates.longitude, updates.latitude],
             "center": [updates.lon, updates.lat],
             "zoom": updates.zoom,
-            "bearing": updates.bearing,
-            "pitch": updates.pitch
+            // "bearing": updates.bearing,
+            // "pitch": updates.pitch
           };
 
           console.log('p', position);
