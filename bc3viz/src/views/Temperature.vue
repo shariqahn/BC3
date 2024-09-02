@@ -192,8 +192,8 @@ export default {
           "latitude": center.lat,
           "longitude": center.lng,
           "zoom": this.map.getZoom(),
-          "bearing": this.map.getBearing(),
-          "pitch": this.map.getPitch()
+          // "bearing": this.map.getBearing(),
+          // "pitch": this.map.getPitch()
         }, 
         '*');
     },
@@ -241,7 +241,10 @@ export default {
       //   }
 
       if ((updates.longitude != center.lng) || (updates.latitude != center.lat) || 
-        (updates.zoom != this.map.getZoom()) || (updates.bearing != this.map.getBearing()) || (updates.pitch != this.map.getPitch())) {
+        (updates.zoom != this.map.getZoom())
+        //  || (updates.bearing != this.map.getBearing()) || (updates.pitch != this.map.getPitch())
+        ) 
+        {
           let position = {
             // "center": [updates.longitude, updates.latitude],
             "center": [updates.lon, updates.lat],
