@@ -101,25 +101,6 @@ export default {
         center: [longitude, latitude]
       });
 
-//       // Log tile loading events
-//       this.map.on('sourcedata', (e) => {
-//         console.log('Source data event:', e);
-//         this.count = this.count +1;
-//         console.log(this.count);
-//       });
-
-//       this.map.on('styledata', (e) => {
-//         console.log('style data event:', e);
-//       });
-//       this.map.on('style.import.load', () => {
-//     console.log('A style load event occurred.');
-// });
-
-      // // Example: Log when tiles are loaded
-      // this.map.on('tile.load', (e) => {
-      //   console.log('Tile loaded:', e.tile);
-      // });
-
       this.map.on('load', () => {
         
         // const layers = this.map.getStyle().layers;
@@ -229,7 +210,6 @@ export default {
         ) 
         {
           let position = {
-            // "center": [updates.longitude, updates.latitude],
             "center": [updates.lon, updates.lat],
             "zoom": updates.zoom,
             "bearing": updates.bearing,
