@@ -192,8 +192,8 @@ export default {
           "latitude": center.lat,
           "longitude": center.lng,
           "zoom": this.map.getZoom(),
-          // "bearing": this.map.getBearing(),
-          // "pitch": this.map.getPitch()
+          "bearing": this.map.getBearing(),
+          "pitch": this.map.getPitch()
         }, 
         '*');
     },
@@ -223,46 +223,18 @@ export default {
 
       // todo ck if update provided AT ALL?
       const center = this.map.getCenter();
-      // if (updates.longitude != center.lng) {
-      //   console.log('lng');
-
-      // } if (updates.latitude != center.lat) {
-      //   console.log('la');
-
-      // } 
-      //   if (updates.zoom != this.map.getZoom()) {
-      //     console.log('z');
-
-      //   } if (updates.bearing != this.map.getBearing()) {
-      //     console.log('b');
-
-      //   } if (updates.pitch != this.map.getPitch()) {
-      //     console.log('pit');
-      //   }
 
       if ((updates.longitude != center.lng) || (updates.latitude != center.lat) || 
-        (updates.zoom != this.map.getZoom())
-        //  || (updates.bearing != this.map.getBearing()) || (updates.pitch != this.map.getPitch())
+        (updates.zoom != this.map.getZoom()) || (updates.bearing != this.map.getBearing()) || (updates.pitch != this.map.getPitch())
         ) 
         {
           let position = {
             // "center": [updates.longitude, updates.latitude],
             "center": [updates.lon, updates.lat],
             "zoom": updates.zoom,
-            // "bearing": updates.bearing,
-            // "pitch": updates.pitch
+            "bearing": updates.bearing,
+            "pitch": updates.pitch
           };
-
-          console.log('p', position);
-
-          // let position = {
-          //   "center": [updates.longitude, updates.latitude],
-          //   "zoom": updates.zoom,
-          // }
-          // if (this.projection == 'globe') {
-          //   position.bearing = updates.bearing;
-          //   position.pitch = updates.pitch;
-          // }
           this.map.jumpTo(position);
       }
       
