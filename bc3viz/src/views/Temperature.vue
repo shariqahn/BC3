@@ -135,11 +135,14 @@ export default {
           "countries-bg"
         );
 
-        const geocoder = new MapboxGeocoder({
+        // todo make this work for equal earth
+        if (this.projection == 'globe') {
+          const geocoder = new MapboxGeocoder({
             accessToken: this.accessToken,
             mapboxgl: mapboxgl
-        })
-        this.map.addControl(geocoder);
+          })
+          this.map.addControl(geocoder);
+        }
         this.map.addControl(new mapboxgl.NavigationControl());
 
         const popup = new mapboxgl.Popup();
@@ -336,6 +339,7 @@ export default {
     </ul>
   </div>
   </div>
+  
 </template>
 
 <style scoped>

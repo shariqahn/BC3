@@ -51,7 +51,7 @@ a,
   top: 0;
   z-index: 9999;
 
-  background: rgb(215, 226, 230);
+  background: var(--color-background);
   transition: opacity 0.5s linear;
 
 }
