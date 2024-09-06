@@ -14,8 +14,7 @@ export default {
           data: {},
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
           // colors from IPCC: https://www.ipcc.ch/site/assets/uploads/2022/09/IPCC_AR6_WGI_VisualStyleGuide_2022.pdf#page=13
-          celsiusScale: ['rgb(254, 254, 203)', 'rgb(252, 240, 165)', 'rgb(248, 222, 127)', 'rgb(241, 195, 95)', 'rgb(235, 167, 84)', 'rgb(230, 142, 81)', 'rgb(222, 116, 79)', 'rgb(200, 89 ,74)', 'rgb(164, 70 ,66)', 'rgb(126, 59 ,52)', 'rgb(89 ,47, 35)', 'rgb(55 ,36, 19)', 'rgb(25 ,25, 0)'],
-          fahrenheitScale: ['rgb(254, 254, 203)', 'rgb(251, 237, 158)', 'rgb(245, 212, 112)', 'rgb(238, 178, 87)', 'rgb(231, 147, 82)', 'rgb(222, 116, 79)', 'rgb(194, 84, 73)', 'rgb(149, 65, 61)', 'rgb(104, 52, 42)', 'rgb(62, 38, 22)', 'rgb(25, 25, 0)'],
+          celsiusScale: ['rgb(254, 254, 203)', 'rgb(248, 222, 127)', 'rgb(235, 167, 84)', 'rgb(222, 116, 79)', 'rgb(164, 70 ,66)', 'rgb(89 ,47, 35)', 'rgb(25 ,25, 0)'],          fahrenheitScale: ['rgb(254, 254, 203)', 'rgb(251, 237, 158)', 'rgb(245, 212, 112)', 'rgb(238, 178, 87)', 'rgb(231, 147, 82)', 'rgb(222, 116, 79)', 'rgb(194, 84, 73)', 'rgb(149, 65, 61)', 'rgb(104, 52, 42)', 'rgb(62, 38, 22)', 'rgb(25, 25, 0)'],
           logBase: 2,
           tbar: undefined,
           map: undefined,
@@ -276,14 +275,12 @@ export default {
       ['linear'],
       ['get', 'temperature']
     ];
-    if (this.unit == 'C') {
-      for (let i = 0; i < this.celsiusScale.length; i++) {
-        this.fillColor.push(...[i*.5, this.celsiusScale[i]]);
-      }
-    } else {
-      for (let i = 0; i < this.fahrenheitScale.length; i++) {
-        this.fillColor.push(...[i, this.fahrenheitScale[i]]);
-      }
+    let scale = this.celsiusScale;
+    if (this.unit == 'F') {
+      scale = this.fahrenheitScale;
+    }
+    for (let i = 0; i < scale.length; i++) {
+      this.fillColor.push(...[i, scale[i]]);
     }
 
     // this.start = Date.now();
@@ -321,12 +318,13 @@ export default {
   <div class='legend-title'>Temperature Increase (&deg{{ unit }})</div>
   <div class='legend-scale'>
     <ul class='legend-labels'>
+    <!-- todo make this less repetitive -->
       <div v-if="unit == 'C'">
         <li><span :style="{background: celsiusScale[0]}"></span>0</li>
         <li v-for="n in celsiusScale.length-2">
-          <span :style="{background: celsiusScale[n]}"></span>{{.5*n}}
+          <span :style="{background: celsiusScale[n]}"></span>{{n}}
         </li>
-        <li><span :style="{background: celsiusScale[celsiusScale.length-1]}"></span>{{.5*(celsiusScale.length-1)}}+</li>
+        <li><span :style="{background: celsiusScale[celsiusScale.length-1]}"></span>{{(celsiusScale.length-1)}}+</li>
       </div>
       <div v-else>
         <li><span :style="{background: fahrenheitScale[0]}"></span>0</li>
