@@ -4,6 +4,7 @@ import mapboxgl from "mapbox-gl";
 import "../../node_modules/mapbox-gl/dist/mapbox-gl.css"
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import '../assets/mapbox-bc3.css'
 
 export default {
   data() {
@@ -14,7 +15,8 @@ export default {
           data: {},
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
           // colors from IPCC: https://www.ipcc.ch/site/assets/uploads/2022/09/IPCC_AR6_WGI_VisualStyleGuide_2022.pdf#page=13
-          celsiusScale: ['rgb(254, 254, 203)', 'rgb(248, 222, 127)', 'rgb(235, 167, 84)', 'rgb(222, 116, 79)', 'rgb(164, 70 ,66)', 'rgb(89 ,47, 35)', 'rgb(25 ,25, 0)'],          fahrenheitScale: ['rgb(254, 254, 203)', 'rgb(251, 237, 158)', 'rgb(245, 212, 112)', 'rgb(238, 178, 87)', 'rgb(231, 147, 82)', 'rgb(222, 116, 79)', 'rgb(194, 84, 73)', 'rgb(149, 65, 61)', 'rgb(104, 52, 42)', 'rgb(62, 38, 22)', 'rgb(25, 25, 0)'],
+          celsiusScale: ['rgb(254, 254, 203)', 'rgb(248, 222, 127)', 'rgb(235, 167, 84)', 'rgb(222, 116, 79)', 'rgb(164, 70 ,66)', 'rgb(89 ,47, 35)', 'rgb(25 ,25, 0)'],          
+          fahrenheitScale: ['rgb(254, 254, 203)', 'rgb(251, 237, 158)', 'rgb(245, 212, 112)', 'rgb(238, 178, 87)', 'rgb(231, 147, 82)', 'rgb(222, 116, 79)', 'rgb(194, 84, 73)', 'rgb(149, 65, 61)', 'rgb(104, 52, 42)', 'rgb(62, 38, 22)', 'rgb(25, 25, 0)'],
           logBase: 2,
           tbar: undefined,
           map: undefined,
@@ -26,7 +28,9 @@ export default {
           renderTime: undefined,
           count: 0,
           fillColor: [],
-          resolution: undefined
+          resolution: undefined,
+          tooltip: undefined,
+          tooltipCenter: undefined
       }
   },
   methods: {
@@ -145,15 +149,12 @@ export default {
         }
         this.map.addControl(new mapboxgl.NavigationControl());
 
-        const popup = new mapboxgl.Popup();
+        this.tooltip = new mapboxgl.Popup();
         this.map.on('click', 'temperature-map', (e) => {
-            let temperature = e.features[0].properties.temperature;
-            if (temperature < 10) {
-              temperature = temperature.toFixed(1)
-            } else {
-              temperature = Math.round(temperature)
-            }
-            popup.setLngLat(e.lngLat).setHTML('+' + temperature + ' &deg' + this.unit).addTo(this.map);
+            console.log('click e', e.features);
+            this.tooltipCenter = JSON.parse(e.features[0].properties.center);
+            const temperature = this.getTemperature();
+            this.tooltip.setLngLat(e.lngLat).setHTML('+' + temperature + ' &deg' + this.unit).addTo(this.map);
         });
 
         this.sendMapView();
@@ -168,6 +169,32 @@ export default {
         console.log(`Render time: ${end - this.dataTime} ms`);
         this.loading = false;
       });
+    },
+    getTemperature() {
+      // Convert center of pixel to index for temperature data
+      let i;
+      let j;
+      if (this.resolution == 1.5) {
+        i = (this.tooltipCenter[1] + 89.25) / 1.5;
+        j = this.tooltipCenter[0] / 1.5;
+      } 
+      // todo review below
+      else if (this.resolution == 2) {
+        i = (this.tooltipCenter[1] + 89) / 2;
+        j = this.tooltipCenter[0] / 2;
+      }  else { // 1-degree
+        i = (this.tooltipCenter[1] + 89.5);
+        j = this.tooltipCenter[0] - .5;
+      }  
+      let temperature = this.temperatures[i][j];
+
+      if (temperature < 10) {
+        temperature = temperature.toFixed(1)
+      } else {
+        temperature = Math.round(temperature)
+      }
+
+      return temperature
     },
     sendMapView() {
       const center = this.map.getCenter();
@@ -186,11 +213,14 @@ export default {
           console.error('The new tbar value is non a number.');
         } else {
           this.tbar = updates.tbar;
-          console.log('new tbar: ', this.tbar);
           this.getTemperatures()
             .then(() => {
               const source = this.map.getSource('temperature');
               source.setData(this.data);
+              if (this.tooltip.isOpen()) {
+                const temperature = this.getTemperature();
+                this.tooltip.setHTML('+' + temperature + ' &deg' + this.unit);
+              }
             })
             .catch(error => {
               console.error('Error occurred while updating temperatures:', error);
@@ -222,17 +252,19 @@ export default {
     },
     async getTemperatures() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       try {
         const response = await axios.get(path);
         this.temperatures = response.data.temps;
         this.latitudes = response.data.lats;
         this.longitudes = response.data.lons;
+        console.log('res', response);
+        console.log('temps', this.temperatures);
         this.getGeoJSON();
       } catch (error) {
         console.error('Error occurred while gathering data:', error);
