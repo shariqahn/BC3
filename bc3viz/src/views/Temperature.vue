@@ -16,7 +16,7 @@ export default {
           accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
           // colors from IPCC: https://www.ipcc.ch/site/assets/uploads/2022/09/IPCC_AR6_WGI_VisualStyleGuide_2022.pdf#page=13
           celsiusScale: ['rgb(254, 254, 203)', 'rgb(248, 222, 127)', 'rgb(235, 167, 84)', 'rgb(222, 116, 79)', 'rgb(164, 70 ,66)', 'rgb(89 ,47, 35)', 'rgb(25 ,25, 0)'],          
-          fahrenheitScale: ['rgb(254, 254, 203)', 'rgb(251, 237, 158)', 'rgb(245, 212, 112)', 'rgb(238, 178, 87)', 'rgb(231, 147, 82)', 'rgb(222, 116, 79)', 'rgb(194, 84, 73)', 'rgb(149, 65, 61)', 'rgb(104, 52, 42)', 'rgb(62, 38, 22)', 'rgb(25, 25, 0)'],
+          fahrenheitScale: ['rgb(254, 254, 203)', 'rgb(245, 212, 112)', 'rgb(231, 147, 82)', 'rgb(194, 84, 73)', 'rgb(104, 52, 42)', 'rgb(25, 25, 0)'],
           logBase: 2,
           tbar: undefined,
           map: undefined,
@@ -151,7 +151,6 @@ export default {
 
         this.tooltip = new mapboxgl.Popup();
         this.map.on('click', 'temperature-map', (e) => {
-            console.log('click e', e.features);
             this.tooltipCenter = JSON.parse(e.features[0].properties.center);
             const temperature = this.getTemperature();
             this.tooltip.setLngLat(e.lngLat).setHTML('+' + temperature + ' &deg' + this.unit).addTo(this.map);
@@ -177,9 +176,7 @@ export default {
       if (this.resolution == 1.5) {
         i = (this.tooltipCenter[1] + 89.25) / 1.5;
         j = this.tooltipCenter[0] / 1.5;
-      } 
-      // todo review below
-      else if (this.resolution == 2) {
+      } else if (this.resolution == 2) {
         i = (this.tooltipCenter[1] + 89) / 2;
         j = this.tooltipCenter[0] / 2;
       }  else { // 1-degree
@@ -213,7 +210,7 @@ export default {
           console.error('The new tbar value is non a number.');
         } else {
           this.tbar = updates.tbar;
-          this.getTemperatures()
+          this.getTemperatureData()
             .then(() => {
               const source = this.map.getSource('temperature');
               source.setData(this.data);
@@ -250,21 +247,19 @@ export default {
       }
       
     },
-    async getTemperatures() {
+    async getTemperatureData() {
       let url = window.location.origin
-      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
-      url = url.slice(0, url.lastIndexOf(":"))
-      const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      // url = url.slice(0, url.lastIndexOf(":"))
+      // const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       try {
         const response = await axios.get(path);
         this.temperatures = response.data.temps;
         this.latitudes = response.data.lats;
         this.longitudes = response.data.lons;
-        console.log('res', response);
-        console.log('temps', this.temperatures);
         this.getGeoJSON();
       } catch (error) {
         console.error('Error occurred while gathering data:', error);
@@ -310,16 +305,19 @@ export default {
       ['linear'],
       ['get', 'temperature']
     ];
-    let scale = this.celsiusScale;
-    if (this.unit == 'F') {
-      scale = this.fahrenheitScale;
+    if (this.unit == 'C') {
+      for (let i = 0; i < this.celsiusScale.length; i++) {
+        this.fillColor.push(...[i, this.celsiusScale[i]]);
+      }
+    } else {
+      for (let i = 0; i < this.fahrenheitScale.length; i++) {
+        this.fillColor.push(...[i*2, this.fahrenheitScale[i]]);
+      }
     }
-    for (let i = 0; i < scale.length; i++) {
-      this.fillColor.push(...[i, scale[i]]);
-    }
+    
 
     // this.start = Date.now();
-    this.getTemperatures()
+    this.getTemperatureData()
       .then(() => {
         this.dataTime = Date.now();
         // console.log(`Data time: ${this.dataTime - this.start} ms`);
@@ -364,9 +362,9 @@ export default {
       <div v-else>
         <li><span :style="{background: fahrenheitScale[0]}"></span>0</li>
         <li v-for="n in fahrenheitScale.length-2">
-          <span :style="{background: fahrenheitScale[n]}"></span>{{ n }}
+          <span :style="{background: fahrenheitScale[n]}"></span>{{ n*2 }}
         </li>
-        <li><span :style="{background: fahrenheitScale[fahrenheitScale.length-1]}"></span>{{ (fahrenheitScale.length-1) }}+</li>
+        <li><span :style="{background: fahrenheitScale[fahrenheitScale.length-1]}"></span>{{ (fahrenheitScale.length-1)*2 }}+</li>
       </div>
     </ul>
   </div>
@@ -438,6 +436,21 @@ export default {
   border-style: solid;
   border-radius: 5px;
   border-width: 1px;
+}
+
+.my-legend:hover .legend-scale ul li {
+  width: 45px;
+}
+
+.my-legend:hover ul.legend-labels li span {
+  height: 23px;
+  width: 45px;
+}
+  
+.my-legend:hover {
+  bottom: 43px;
+  right: 23px;
+  font-size: 135%;
 }
 
 </style>
