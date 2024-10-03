@@ -239,7 +239,7 @@ export default {
     },
     async getTemperatureData() {
       let url = window.location.origin
-      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
       // url = url.slice(0, url.lastIndexOf(":"))
