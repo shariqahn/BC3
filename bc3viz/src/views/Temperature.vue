@@ -23,10 +23,6 @@ export default {
           projection: 'globe',
           unit: undefined,
           loading: true,
-          start: undefined,
-          dataTime: undefined,
-          renderTime: undefined,
-          count: 0,
           fillColor: [],
           resolution: undefined,
           tooltip: undefined,
@@ -105,22 +101,6 @@ export default {
       });
 
       this.map.on('load', () => {
-        
-        // const layers = this.map.getStyle().layers;
-        // for (const layer of layers) {
-        //     // console.log(layer)
-        //     // if ((layer.type === 'line')) {
-        //     //     console.log(layer)
-        //     // } 
-        //     if ((layer.id === 'water')) {
-        //       console.log(layer)
-        //     }
-        // }
-
-        // // Remove globe halo to allow for contrast between black background and color scale
-        // this.map.setFog({
-        //     "horizon-blend": 0,
-        //   });
           
         this.map.addSource('temperature', {
           type: 'geojson',
@@ -143,7 +123,8 @@ export default {
         if (this.projection == 'globe') {
           const geocoder = new MapboxGeocoder({
             accessToken: this.accessToken,
-            mapboxgl: mapboxgl
+            mapboxgl: mapboxgl,
+            placeholder: 'Search places'
           })
           this.map.addControl(geocoder);
         }
@@ -157,15 +138,16 @@ export default {
         });
 
         this.sendMapView();
+        console.log('init map view');
       });
       
-      this.map.on('moveend', () => {
+      // todo is this sufficient for mobile
+      this.map.on('dragend', () => {
         this.sendMapView();
+        console.log('map moved');
       });
 
       this.map.on('idle', () => {
-        const end = Date.now();
-        console.log(`Render time: ${end - this.dataTime} ms`);
         this.loading = false;
       });
     },
@@ -196,8 +178,8 @@ export default {
     sendMapView() {
       const center = this.map.getCenter();
         window.parent.postMessage({
-          "latitude": center.lat,
-          "longitude": center.lng,
+          "lat": center.lat,
+          "lon": center.lng,
           "zoom": this.map.getZoom(),
           "bearing": this.map.getBearing(),
           "pitch": this.map.getPitch()
@@ -231,12 +213,20 @@ export default {
       }
 
       // todo ck if update provided AT ALL?
-      const center = this.map.getCenter();
-
-      if ((updates.longitude != center.lng) || (updates.latitude != center.lat) || 
-        (updates.zoom != this.map.getZoom()) || (updates.bearing != this.map.getBearing()) || (updates.pitch != this.map.getPitch())
-        ) 
-        {
+      const keys = ['lon', 'lat', 'zoom', 'bearing', 'pitch'];
+      const hasAllKeys = keys.every(key => key in updates);
+      if (!hasAllKeys) {
+        // todo should other things still be updated if this fails
+        console.error('The object does not contain all of the required keys to change the map view: lon, lat, zoom, bearing, and pitch.');
+      } else {
+        const center = this.map.getCenter();
+        if (
+          updates.lon != center.lng || 
+          updates.lat != center.lat || 
+          updates.zoom != this.map.getZoom() || 
+          updates.bearing != this.map.getBearing() || 
+          updates.pitch != this.map.getPitch()
+        ) {
           let position = {
             "center": [updates.lon, updates.lat],
             "zoom": updates.zoom,
@@ -244,12 +234,12 @@ export default {
             "pitch": updates.pitch
           };
           this.map.jumpTo(position);
+        }
       }
-      
     },
     async getTemperatureData() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
       // url = url.slice(0, url.lastIndexOf(":"))
@@ -319,8 +309,6 @@ export default {
     // this.start = Date.now();
     this.getTemperatureData()
       .then(() => {
-        this.dataTime = Date.now();
-        // console.log(`Data time: ${this.dataTime - this.start} ms`);
         this.initMap();
       })
       .catch(error => {
