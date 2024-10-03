@@ -140,7 +140,7 @@ export default {
                 <div id="tooltip-temperature">
                   +${temperature}<span style="font-size: 45%; vertical-align: super">&deg;${this.unit}</span>                
                 </div>
-                <div style="font-weight: bold">Temperature increase<br>at this location by 2100</div>
+                <div style="font-size: 16px; font-weight: bold">Temperature increase<br>at this location by 2100</div>
               `)              
               .addTo(this.map);
         });
@@ -384,7 +384,7 @@ export default {
 
 .my-legend .legend-title {
   text-align: left;
-  margin-bottom: 8px;
+  margin-bottom: .2vw;
   font-size: 90%;
   font-weight: bold;
   }
@@ -393,13 +393,11 @@ export default {
   padding: 0;
   float: left;
   list-style: none;
-
   }
 .my-legend .legend-scale ul li {
   display: block;
   float: left;
   width: 30px;
-  margin-bottom: 6px;
   text-align: center;
   font-size: 80%;
   list-style: none;
