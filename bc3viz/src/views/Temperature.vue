@@ -128,13 +128,21 @@ export default {
           })
           this.map.addControl(geocoder);
         }
-        this.map.addControl(new mapboxgl.NavigationControl());
+        this.map.addControl(new mapboxgl.NavigationControl({showCompass: false}));
 
         this.tooltip = new mapboxgl.Popup();
         this.map.on('click', 'temperature-map', (e) => {
             this.tooltipCenter = JSON.parse(e.features[0].properties.center);
             const temperature = this.getTemperature();
-            this.tooltip.setLngLat(e.lngLat).setHTML('+' + temperature + ' &deg' + this.unit).addTo(this.map);
+            this.tooltip.setLngLat(e.lngLat)
+            // todo include year from enroads
+              .setHTML(`
+                <div id="tooltip-temperature">
+                  +${temperature}<span style="font-size: 45%; vertical-align: super">&deg;${this.unit}</span>                
+                </div>
+                <div style="font-weight: bold">Temperature increase<br>at this location by 2100</div>
+              `)              
+              .addTo(this.map);
         });
 
         this.sendMapView();
@@ -181,8 +189,8 @@ export default {
           "lat": center.lat,
           "lon": center.lng,
           "zoom": this.map.getZoom(),
-          "bearing": this.map.getBearing(),
-          "pitch": this.map.getPitch()
+          "bearing": 0,
+          "pitch": 0
         }, 
         '*');
     },
@@ -213,25 +221,23 @@ export default {
       }
 
       // todo ck if update provided AT ALL?
-      const keys = ['lon', 'lat', 'zoom', 'bearing', 'pitch'];
+      const keys = ['lon', 'lat', 'zoom'];
       const hasAllKeys = keys.every(key => key in updates);
       if (!hasAllKeys) {
         // todo should other things still be updated if this fails
-        console.error('The object does not contain all of the required keys to change the map view: lon, lat, zoom, bearing, and pitch.');
+        console.error('The object does not contain all of the required keys to change the map view: lon, lat, and zoom.');
       } else {
         const center = this.map.getCenter();
         if (
           updates.lon != center.lng || 
           updates.lat != center.lat || 
-          updates.zoom != this.map.getZoom() || 
-          updates.bearing != this.map.getBearing() || 
-          updates.pitch != this.map.getPitch()
+          updates.zoom != this.map.getZoom()
         ) {
           let position = {
             "center": [updates.lon, updates.lat],
             "zoom": updates.zoom,
-            "bearing": updates.bearing,
-            "pitch": updates.pitch
+            "bearing": 0,
+            "pitch": 0
           };
           this.map.jumpTo(position);
         }
@@ -239,11 +245,11 @@ export default {
     },
     async getTemperatureData() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       try {
         const response = await axios.get(path);
@@ -336,7 +342,7 @@ export default {
 
   <!-- todo move to new component -->
   <div class='my-legend'>
-  <div class='legend-title'>Temperature Increase (&deg{{ unit }})</div>
+  <div class='legend-title'>Local Temperature Increase (&deg{{ unit }})</div>
   <div class='legend-scale'>
     <ul class='legend-labels'>
     <!-- todo make this less repetitive -->
@@ -379,8 +385,8 @@ export default {
 .my-legend .legend-title {
   text-align: left;
   margin-bottom: 8px;
-  font-weight: bold;
   font-size: 90%;
+  font-weight: bold;
   }
 .my-legend .legend-scale ul {
   margin: 0;
@@ -397,14 +403,13 @@ export default {
   text-align: center;
   font-size: 80%;
   list-style: none;
-
+  font-weight: bold;
   }
 .my-legend ul.legend-labels li span {
   display: block;
   float: left;
   height: 15px;
   width: 30px;
-
   }
   
 .my-legend a {
