@@ -7,4 +7,16 @@
 .mapboxgl-popup-content {
   text-align: center;
   line-height: 1;
+  padding-top: .5vw;
+  padding-right: 2vw;
+  padding-left: 2vw;
+  /* todo revise units */
+}
+
+.mapboxgl-popup-close-button {
+    /* todo revise units */
+  font-size: 24px;
+  line-height: .8;
+  color: gray;
+  padding-bottom: 4px;
 }

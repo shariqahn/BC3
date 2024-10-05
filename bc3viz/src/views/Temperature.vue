@@ -96,7 +96,7 @@ export default {
         // ?optimize=true', //adding optimize=true didnt seem to hlep anything
         // style: 'mapbox://styles/mapbox/light-v11', // style URL for Mapbox Light
         zoom: zoom,
-        maxZoom: 7,
+        maxZoom: 5, // Note: Layers beyond this zoom point were removed for performance reasons ("POI", "settlement-subdivision-label", "waterway-label", "admin-1-boundary-bg"). Add them back if this parameter changes.
         center: [longitude, latitude]
       });
 
@@ -421,8 +421,8 @@ export default {
   position: absolute;
   background-color: white;
   color: #333333;
-  padding-right: 7px;
-  padding-left: 7px;
+  padding-right: 5px;
+  padding-left: 5px;
   border-color:rgba(0, 0, 0, .1);
   border-style: solid;
   border-radius: 5px;
