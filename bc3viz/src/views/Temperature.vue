@@ -136,12 +136,7 @@ export default {
             const temperature = this.getTemperature();
             this.tooltip.setLngLat(e.lngLat)
             // todo include year from enroads
-              .setHTML(`
-                <div id="tooltip-temperature">
-                  +${temperature}<span style="font-size: 45%; vertical-align: super">&deg;${this.unit}</span>                
-                </div>
-                <div style="font-size: 16px; font-weight: bold">Temperature increase<br>at this location by 2100</div>
-              `)              
+              .setHTML(this.getTooltipHTML(temperature))             
               .addTo(this.map);
         });
 
@@ -158,6 +153,14 @@ export default {
       this.map.on('idle', () => {
         this.loading = false;
       });
+    },
+    getTooltipHTML(temperature) {
+      return `<div id="tooltip-temperature">
+                <span style="font-size: 7.5vw">+${temperature}</span><span style="font-size: 3vw; vertical-align: 100%">&deg;${this.unit}</span>                
+              </div>
+              <div style="font-size: 2vw; font-weight: bold; white-space: nowrap">
+                Temperature increase<br>at this location by 2100
+              </div>`
     },
     getTemperature() {
       // Convert center of pixel to index for temperature data
@@ -206,7 +209,7 @@ export default {
               source.setData(this.data);
               if (this.tooltip.isOpen()) {
                 const temperature = this.getTemperature();
-                this.tooltip.setHTML('+' + temperature + ' &deg' + this.unit);
+                this.tooltip.setHTML(this.gettooltipHTML(temperature));
               }
             })
             .catch(error => {
