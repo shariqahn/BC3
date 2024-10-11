@@ -156,9 +156,9 @@ export default {
     },
     getTooltipHTML(temperature) {
       return `<div id="tooltip-temperature">
-                <span style="font-size: 7.5vw">+${temperature}</span><span style="font-size: 3vw; vertical-align: 100%">&deg;${this.unit}</span>                
+                <span style="font-size: 6vw">+${temperature}</span><span style="font-size: 2.5vw; vertical-align: 100%">&deg;${this.unit}</span>                
               </div>
-              <div style="font-size: 2vw; font-weight: bold; white-space: nowrap">
+              <div style="font-size: 1.5vw; font-weight: bold; white-space: nowrap">
                 Temperature increase<br>at this location by 2100
               </div>`
     },
@@ -209,7 +209,7 @@ export default {
               source.setData(this.data);
               if (this.tooltip.isOpen()) {
                 const temperature = this.getTemperature();
-                this.tooltip.setHTML(this.gettooltipHTML(temperature));
+                this.tooltip.setHTML(this.getTooltipHTML(temperature));
               }
             })
             .catch(error => {
@@ -248,11 +248,11 @@ export default {
     },
     async getTemperatureData() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       try {
         const response = await axios.get(path);

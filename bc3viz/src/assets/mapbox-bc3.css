@@ -10,14 +10,16 @@
   padding-top: .5vw;
   padding-right: 2vw;
   padding-left: 2vw;
+  padding-bottom: 1.5vh;
   width: max-content;
 }
 
 .mapboxgl-popup-close-button {
   font-size: 3vw;
-  line-height: .8;
+  line-height: .7;
   color: gray;
   padding-bottom: .5vh;
+  padding-top: 0%;
 }
 
 .mapboxgl-popup-anchor-bottom, .mapboxgl-popup-anchor-top {
