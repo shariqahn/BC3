@@ -120,6 +120,7 @@ export default {
         );
 
         // todo make this work for equal earth
+        // todo include this check upon update
         if (this.projection == 'globe') {
           const geocoder = new MapboxGeocoder({
             accessToken: this.accessToken,
@@ -188,6 +189,14 @@ export default {
     },
     sendMapView() {
       const center = this.map.getCenter();
+        console.log(center);
+        console.log({
+          "lat": center.lat,
+          "lon": center.lng,
+          "zoom": this.map.getZoom(),
+          "bearing": 0,
+          "pitch": 0
+        });
         window.parent.postMessage({
           "lat": center.lat,
           "lon": center.lng,
