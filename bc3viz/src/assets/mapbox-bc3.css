@@ -11,11 +11,9 @@
   padding-right: 2vw;
   padding-left: 2vw;
   width: max-content;
-  /* todo revise units */
 }
 
 .mapboxgl-popup-close-button {
-  /* todo revise units */
   font-size: 3vw;
   line-height: .8;
   color: gray;
