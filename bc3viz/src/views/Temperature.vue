@@ -156,9 +156,9 @@ export default {
     },
     getTooltipHTML(temperature) {
       return `<div id="tooltip-temperature">
-                <span style="font-size: 6vw">+${temperature}</span><span style="font-size: 2.5vw; vertical-align: 100%">&deg;${this.unit}</span>                
+                <span style="font-size: 8vw">+${temperature}</span><span style="font-size: 3.5vw; vertical-align: 90%">&deg;${this.unit}</span>                
               </div>
-              <div style="font-size: 1.5vw; font-weight: bold; white-space: nowrap">
+              <div style="font-size: 2.5vw; font-weight: bold; white-space: nowrap">
                 Temperature increase<br>at this location by 2100
               </div>`
     },

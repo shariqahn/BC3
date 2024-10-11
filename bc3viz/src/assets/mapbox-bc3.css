@@ -7,10 +7,10 @@
 .mapboxgl-popup-content {
   text-align: center;
   line-height: 1;
-  padding-top: .5vw;
+  padding-top: 0vh;
   padding-right: 2vw;
   padding-left: 2vw;
-  padding-bottom: 1.5vh;
+  padding-bottom: 2vh;
   width: max-content;
 }
 
