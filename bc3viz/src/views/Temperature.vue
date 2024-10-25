@@ -26,7 +26,9 @@ export default {
           fillColor: [],
           resolution: undefined,
           tooltip: undefined,
-          tooltipCenter: undefined
+          tooltipCenter: undefined,
+          geocoder: undefined,
+          navigation: undefined
       }
   },
   methods: {
@@ -122,14 +124,15 @@ export default {
         // todo make this work for equal earth
         // todo include this check upon update
         if (this.projection == 'globe') {
-          const geocoder = new MapboxGeocoder({
+          this.geocoder = new MapboxGeocoder({
             accessToken: this.accessToken,
             mapboxgl: mapboxgl,
             placeholder: 'Search places'
           })
-          this.map.addControl(geocoder);
+          this.map.addControl(this.geocoder);
         }
-        this.map.addControl(new mapboxgl.NavigationControl({showCompass: false}));
+        this.navigation = new mapboxgl.NavigationControl({showCompass: false});
+        this.map.addControl(this.navigation);
 
         this.tooltip = new mapboxgl.Popup();
         this.map.on('click', 'temperature-map', (e) => {
@@ -230,6 +233,13 @@ export default {
       if(updates.projection && (this.projection != updates.projection)) {
         this.projection = updates.projection;
         this.map.setProjection(this.projection);
+        if (this.projection == 'globe') {
+          this.map.removeControl(this.navigation);
+          this.map.addControl(this.geocoder);
+          this.map.addControl(this.navigation);
+        } else {
+          this.map.removeControl(this.geocoder);
+        }
       }
 
       // todo ck if update provided AT ALL?

@@ -1,10 +1,6 @@
 # bc3viz
 
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+Dev demo: https://en-roads.dev.climateinteractive.org/branch/demo/bc3-map-v2/scenario.html?v=24.10.0&g0=2&g1=250&g1-url=https://bc3vizdev.mit.edu/temperature 
 
 ## Customize configuration
 
