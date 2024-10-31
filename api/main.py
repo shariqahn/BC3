@@ -1,7 +1,7 @@
 from flask import Flask, request
 import netCDF4 as nc
 import numpy as np
-
+from flask_talisman import Talisman
 from flask_cors import CORS
 
 # ################ OLD PS #####################
@@ -43,6 +43,8 @@ def patternscaling( Tbar, filename ):
 #####################################
 
 app = Flask(__name__)
+# add security headers
+talisman = Talisman(app)
 CORS(app)
 # todo how many simultaneous requests can this handle
 @app.route('/temperature')

@@ -13,7 +13,6 @@ export default {
           latitudes: [],
           longitudes: [],
           data: {},
-          accessToken: 'pk.eyJ1Ijoic2hhcmlxYWgiLCJhIjoiY2x0MmQ3OHMzMWt5dTJxbnc0cmk3dHE5cyJ9.HQ80jJpT5LRbIHjQLFgt3Q',
           // colors from IPCC: https://www.ipcc.ch/site/assets/uploads/2022/09/IPCC_AR6_WGI_VisualStyleGuide_2022.pdf#page=13
           celsiusScale: ['rgb(254, 254, 203)', 'rgb(248, 222, 127)', 'rgb(235, 167, 84)', 'rgb(222, 116, 79)', 'rgb(164, 70 ,66)', 'rgb(89 ,47, 35)', 'rgb(25 ,25, 0)'],          
           fahrenheitScale: ['rgb(254, 254, 203)', 'rgb(245, 212, 112)', 'rgb(231, 147, 82)', 'rgb(194, 84, 73)', 'rgb(104, 52, 42)', 'rgb(25, 25, 0)'],
@@ -74,7 +73,7 @@ export default {
       })
     },
     initMap() {
-      mapboxgl.accessToken = this.accessToken;
+      mapboxgl.accessToken = import.meta.env.VITE_APP_MAPBOX_KEY;
       let longitude = this.$route.query.lon
       let latitude = this.$route.query.lat
       let zoom = this.$route.query.zoom
@@ -125,7 +124,7 @@ export default {
         // todo include this check upon update
         if (this.projection == 'globe') {
           this.geocoder = new MapboxGeocoder({
-            accessToken: this.accessToken,
+            accessToken: import.meta.env.VITE_APP_MAPBOX_KEY,
             mapboxgl: mapboxgl,
             placeholder: 'Search places'
           })

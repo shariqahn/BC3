@@ -5,3 +5,4 @@ api/psenv
 *.py[cod]
 grr.html
 test-iframe.html
+api/.env
