@@ -35,5 +35,5 @@ shapely==2.0.2
 six==1.16.0
 tzdata==2023.3
 urllib3==2.2.2
-Werkzeug==3.0.3
+Werkzeug==3.0.6
 xarray==2023.10.1
