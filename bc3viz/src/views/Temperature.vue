@@ -27,7 +27,8 @@ export default {
           tooltip: undefined,
           tooltipCenter: undefined,
           geocoder: undefined,
-          navigation: undefined
+          navigation: undefined,
+          hideLegend: undefined
       }
   },
   methods: {
@@ -181,6 +182,10 @@ export default {
       }  
       let temperature = this.temperatures[i][j];
 
+      if (this.unit == 'F') {
+        temperature = this.toFahrenheit(temperature);
+      }
+
       if (temperature < 10) {
         temperature = temperature.toFixed(1)
       } else {
@@ -266,11 +271,11 @@ export default {
     },
     async getTemperatureData() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       try {
         const response = await axios.get(path);
@@ -301,10 +306,12 @@ export default {
   },
   mounted() {
     // todo handle error better here
-    const tbar = this.$route.query.tbar
+    const tbar = this.$route.query.tbar;
     this.tbar = tbar ? tbar : 0;
-    const resolution = this.$route.query.resolution
+    const resolution = this.$route.query.resolution;
     this.resolution = resolution ? resolution : 1.5;
+    const hideLegend = this.$route.query['hide-legend'];
+    this.hideLegend = hideLegend ? hideLegend.toLowerCase() : false;
 
     let unit = this.$route.query.temperature_unit;
     if (unit) {
@@ -362,7 +369,7 @@ export default {
   <div id="map"></div>
 
   <!-- todo move to new component -->
-  <div class='my-legend'>
+  <div v-if="!hideLegend" class='my-legend'>
   <div class='legend-title'>Local Temperature Increase (&deg{{ unit }})</div>
   <div class='legend-scale'>
     <ul class='legend-labels'>
