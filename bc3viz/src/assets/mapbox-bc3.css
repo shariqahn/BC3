@@ -27,15 +27,15 @@
 }
 
 .mapboxgl-ctrl-top-right {
-  top: 6px;
-  right: 7px;
+  top: .6em;
+  right: .6em;
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group {
   box-shadow: 0 0 .3rem #bbb;
   border-radius: 0;
   background-color: #fdfdfd;
-  margin: 10 !important;
+  margin: 0 !important;
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group button {
