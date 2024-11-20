@@ -39,7 +39,7 @@
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group button {
-  width: 1.9em; 
+  width: 2em; 
   height: 1.9em;
   border: none;
   outline: 0;
@@ -53,8 +53,8 @@
 }
 
 :global(.map-and-desc.large) .mapboxgl-ctrl.mapboxgl-ctrl-group button {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.4em;
+  height: 2.3em;
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group button:first-child {
