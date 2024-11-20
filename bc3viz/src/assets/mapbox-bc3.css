@@ -27,20 +27,20 @@
 }
 
 .mapboxgl-ctrl-top-right {
-  top: .3rem;
-  right: .3rem;
+  top: 6px;
+  right: 7px;
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group {
   box-shadow: 0 0 .3rem #bbb;
   border-radius: 0;
   background-color: #fdfdfd;
-  margin: 0 !important;
+  margin: 10 !important;
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group button {
-  width: 1.2rem; 
-  height: 1.2rem;
+  width: 1.9em; 
+  height: 1.9em;
   border: none;
   outline: 0;
   color: #1b1a1c;
@@ -64,7 +64,3 @@
   border-bottom-left-radius: unset;
   border-bottom-right-radius: unset;
 }
-
-/* .mapboxgl-ctrl.mapboxgl-ctrl-group button:last-child {
-  display: none;
-} */
