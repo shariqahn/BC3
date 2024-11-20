@@ -123,14 +123,14 @@ export default {
 
         // todo make this work for equal earth
         // todo include this check upon update
-        if (this.projection == 'globe') {
-          this.geocoder = new MapboxGeocoder({
-            accessToken: import.meta.env.VITE_APP_MAPBOX_KEY,
-            mapboxgl: mapboxgl,
-            placeholder: 'Search places'
-          })
-          this.map.addControl(this.geocoder);
-        }
+        // if (this.projection == 'globe') {
+        //   this.geocoder = new MapboxGeocoder({
+        //     accessToken: import.meta.env.VITE_APP_MAPBOX_KEY,
+        //     mapboxgl: mapboxgl,
+        //     placeholder: 'Search places'
+        //   })
+        //   this.map.addControl(this.geocoder);
+        // }
         this.navigation = new mapboxgl.NavigationControl({showCompass: false});
         this.map.addControl(this.navigation);
 
