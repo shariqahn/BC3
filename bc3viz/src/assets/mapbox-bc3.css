@@ -27,8 +27,8 @@
 }
 
 .mapboxgl-ctrl-top-right {
-  top: .5rem;
-  right: .5rem;
+  top: .4rem;
+  right: .4rem;
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group {
@@ -58,8 +58,8 @@
 }
 
 :global(.map-and-desc.large) .mapboxgl-ctrl-top-right {
-  top: .2rem;
-  right: .2rem;
+  top: .2rem !important;
+  right: .2rem !important;
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group button:first-child {
