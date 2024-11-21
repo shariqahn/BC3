@@ -27,8 +27,8 @@
 }
 
 .mapboxgl-ctrl-top-right {
-  top: .6em;
-  right: .6em;
+  top: .5rem;
+  right: .5rem;
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group {
@@ -39,8 +39,8 @@
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group button {
-  width: .2rem; 
-  height: .2rem;
+  width: 1.9em; 
+  height: 1.9em;
   border: none;
   outline: 0;
   color: #1b1a1c;
