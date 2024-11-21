@@ -27,8 +27,8 @@
 }
 
 .mapboxgl-ctrl-top-right {
-  top: .6em;
-  right: .6em;
+  top: .3rem;
+  right: .3rem;
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group {
@@ -39,7 +39,46 @@
 }
 
 .mapboxgl-ctrl.mapboxgl-ctrl-group button {
-  width: 2em; 
+  width: 1.3rem;
+  height: 1.3rem;
+  border: none;
+  outline: 0;
+  color: #1b1a1c;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.mapboxgl-ctrl.mapboxgl-ctrl-group .mapboxgl-ctrl-icon {
+  transform: scale(1.4)
+}
+
+:global(.map-and-desc.large) .mapboxgl-ctrl.mapboxgl-ctrl-group button {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.mapboxgl-ctrl.mapboxgl-ctrl-group button:first-child {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom: 1px solid rgba(151, 151, 151, 0.5);
+  border-bottom-left-radius: unset;
+  border-bottom-right-radius: unset;
+}
+
+/* .mapboxgl-ctrl-top-right {
+  top: .3rem;
+  right: .3rem;
+}
+
+.mapboxgl-ctrl.mapboxgl-ctrl-group {
+  box-shadow: 0 0 .3rem #bbb;
+  border-radius: 0;
+  background-color: #fdfdfd;
+  margin: 0 !important;
+}
+
+.mapboxgl-ctrl.mapboxgl-ctrl-group button {
+  width: 1.9em; 
   height: 1.9em;
   border: none;
   outline: 0;
@@ -63,4 +102,4 @@
   border-bottom: 1px solid rgba(151, 151, 151, 0.5);
   border-bottom-left-radius: unset;
   border-bottom-right-radius: unset;
-}
+} */
