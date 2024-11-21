@@ -237,13 +237,13 @@ export default {
       if(updates.projection && (this.projection != updates.projection)) {
         this.projection = updates.projection;
         this.map.setProjection(this.projection);
-        if (this.projection == 'globe') {
-          this.map.removeControl(this.navigation);
-          this.map.addControl(this.geocoder);
-          this.map.addControl(this.navigation);
-        } else {
-          this.map.removeControl(this.geocoder);
-        }
+        // if (this.projection == 'globe') {
+        //   this.map.removeControl(this.navigation);
+        //   this.map.addControl(this.geocoder);
+        //   this.map.addControl(this.navigation);
+        // } else {
+        //   this.map.removeControl(this.geocoder);
+        // }
       }
 
       // todo ck if update provided AT ALL?
