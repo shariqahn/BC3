@@ -25,10 +25,13 @@ export default {
           fillColor: [],
           resolution: undefined,
           tooltip: undefined,
-          tooltipCenter: undefined,
           geocoder: undefined,
           navigation: undefined,
-          hideLegend: undefined
+          hideLegend: undefined,
+          tooltipTemplate: 'at this location by ${year}',
+          // 'Temperature increase<br>at this location by 2100',
+          tooltipColor: 'black',
+          marker: undefined
       }
   },
   methods: {
@@ -75,17 +78,6 @@ export default {
     },
     initMap() {
       mapboxgl.accessToken = import.meta.env.VITE_APP_MAPBOX_KEY;
-      let longitude = this.$route.query.lon
-      let latitude = this.$route.query.lat
-      let zoom = this.$route.query.zoom
-      const projection = this.$route.query.projection
-
-      longitude = longitude ? longitude : 0
-      latitude = latitude ? latitude : 0
-      zoom = zoom ? zoom : 2
-      if (projection) {
-        this.projection = projection
-      }
       // todo add error handling to ensure in range
 
       this.map = new mapboxgl.Map({
@@ -97,9 +89,9 @@ export default {
         // style: 'mapbox://styles/mapbox/streets-v12?optimize=true', // takes about 2s to render without coastline; 2.4 wiht
         // ?optimize=true', //adding optimize=true didnt seem to hlep anything
         // style: 'mapbox://styles/mapbox/light-v11', // style URL for Mapbox Light
-        zoom: zoom,
+        zoom: this.zoom,
         maxZoom: 5, // Note: Layers beyond this zoom point were removed for performance reasons ("POI", "settlement-subdivision-label", "waterway-label", "admin-1-boundary-bg"). Add them back if this parameter changes.
-        center: [longitude, latitude]
+        center: [this.longitude, this.latitude]
       });
 
       this.map.on('load', () => {
@@ -142,16 +134,35 @@ export default {
             // todo include year from enroads
               .setHTML(this.getTooltipHTML(temperature))             
               .addTo(this.map);
+            console.log('popup was added');
+            console.log({
+              "kind": 'tooltip-changed',
+              "lat": this.tooltipCenter[1],
+              "lon": this.tooltipCenter[0]
+            })
+            window.parent.postMessage({
+              "kind": 'tooltip-changed',
+              "lat": this.tooltipCenter[1],
+              "lon": this.tooltipCenter[0]
+            }, 
+            '*');
         });
 
-        this.sendMapView();
-        console.log('init map view');
+        this.tooltip.on('close', () => {
+          console.log('popup was closed');
+          console.log({
+            "kind": 'tooltip-changed'
+          })
+          window.parent.postMessage({
+            "kind": 'tooltip-changed'
+          }, 
+          '*');
+        });
       });
       
       // todo is this sufficient for mobile
       this.map.on('dragend', () => {
         this.sendMapView();
-        console.log('map moved');
       });
 
       this.map.on('idle', () => {
@@ -159,28 +170,44 @@ export default {
       });
     },
     getTooltipHTML(temperature) {
-      return `<div id="tooltip-temperature">
+      // const year = this.year;
+//       const year = this.tooltipTemplate;
+// const codeString = `var locationString = "at this location by ${year}";`;
+// eval(codeString);
+// console.log(locationString); // Outputs: at this location by 2023
+      const year = 2100;
+      // const template = `${this.tooltipTemplate}`;
+      let text;
+      // const setText = `text = \"blah\";`;
+      const setText = '\`text = ${this.tooltipTemplate};\`';
+      console.log(setText);
+      eval(setText);
+      console.log(text);
+
+      
+      return `<div id="tooltip-temperature" style="color: ${this.tooltipColor}">
                 <span style="font-size: 8vw">+${temperature}</span><span style="font-size: 3.5vw; vertical-align: 90%">&deg;${this.unit}</span>                
               </div>
               <div style="font-size: 2.5vw; font-weight: bold; white-space: nowrap">
-                Temperature increase<br>at this location by 2100
+                ${text}
               </div>`
     },
     getTemperature() {
       // Convert center of pixel to index for temperature data
-      let i;
-      let j;
+      let latitudeIndex;
+      let longitudeIndex;
       if (this.resolution == 1.5) {
-        i = (this.tooltipCenter[1] + 89.25) / 1.5;
-        j = this.tooltipCenter[0] / 1.5;
+        latitudeIndex = (this.tooltipCenter[1] + 89.25) / 1.5;
+        longitudeIndex = this.tooltipCenter[0] / 1.5;
       } else if (this.resolution == 2) {
-        i = (this.tooltipCenter[1] + 89) / 2;
-        j = this.tooltipCenter[0] / 2;
+        latitudeIndex = (this.tooltipCenter[1] + 89) / 2;
+        longitudeIndex = this.tooltipCenter[0] / 2;
       }  else { // 1-degree
-        i = (this.tooltipCenter[1] + 89.5);
-        j = this.tooltipCenter[0] - .5;
+        latitudeIndex = (this.tooltipCenter[1] + 89.5);
+        longitudeIndex = this.tooltipCenter[0] - .5;
       }  
-      let temperature = this.temperatures[i][j];
+      console.log(`lat i: ${latitudeIndex}`)
+      let temperature = this.temperatures[latitudeIndex][longitudeIndex];
 
       if (this.unit == 'F') {
         temperature = this.toFahrenheit(temperature);
@@ -196,86 +223,134 @@ export default {
     },
     sendMapView() {
       const center = this.map.getCenter();
-        console.log(center);
+        console.log('map changed. notifying en-roads:');
         console.log({
+          "kind": 'position-changed',
           "lat": center.lat,
           "lon": center.lng,
           "zoom": this.map.getZoom(),
-          "bearing": 0,
-          "pitch": 0
         });
         window.parent.postMessage({
+          "kind": 'position-changed',
           "lat": center.lat,
           "lon": center.lng,
           "zoom": this.map.getZoom(),
-          "bearing": 0,
-          "pitch": 0
         }, 
         '*');
     },
-    updateMap(updates) {
-      if (this.tbar != updates.tbar) {
-        if (isNaN(updates.tbar)) {
-          console.error('The new tbar value is non a number.');
-        } else {
-          this.tbar = updates.tbar;
-          this.getTemperatureData()
-            .then(() => {
-              const source = this.map.getSource('temperature');
-              source.setData(this.data);
-              if (this.tooltip.isOpen()) {
-                const temperature = this.getTemperature();
-                this.tooltip.setHTML(this.getTooltipHTML(temperature));
-              }
-            })
-            .catch(error => {
-              console.error('Error occurred while updating temperatures:', error);
-            });
+    setMap(features) {
+      console.log('setting map');
+      const messageType = features.kind;
+      switch (messageType) {
+        case 'set-config':
+          this.tooltipColor = features.scenarioColor;
+          this.tooltipTemplate = features.tooltipText;
+          break;
+        case 'set-params':
+          // Sent from En-ROADS to BC3 to change map temperature, projection, and/or position.
+          let updateTooltip = false;
+          if (this.unit != features.temperature_unit) {
+            this.setUnit(features.temperature_unit);
+            updateTooltip = true;
           }
-      }
+          if (this.tbar != features.tbar) {
+            console.log('termperatue changed');
+            this.tbar = features.tbar;
+            updateTooltip = true;
+          }
+          if (updateTooltip) {
+            this.getData()
+              .then(() => {
+                console.log('updating temp');
+                const source = this.map.getSource('temperature');
+                source.setData(this.data);
+                if (this.tooltip.isOpen()) {
+                  const temperature = this.getTemperature();
+                  this.tooltip.setHTML(this.getTooltipHTML(temperature));
+                }
+              })
+              .catch(error => {
+                console.error('Error occurred while updating temperatures:', error);
+              });
+          }
 
-      if(updates.projection && (this.projection != updates.projection)) {
-        this.projection = updates.projection;
-        this.map.setProjection(this.projection);
-        // if (this.projection == 'globe') {
-        //   this.map.removeControl(this.navigation);
-        //   this.map.addControl(this.geocoder);
-        //   this.map.addControl(this.navigation);
-        // } else {
-        //   this.map.removeControl(this.geocoder);
-        // }
-      }
+          // todo ck if update provided AT ALL?
+          const keys = ['lon', 'lat', 'zoom'];
+          const hasAllKeys = keys.every(key => key in features);
+          if (!hasAllKeys) {
+            // todo should other things still be updated if this fails
+            console.error('The object does not contain all of the required keys to change the map view: lon, lat, and zoom.');
+          } else {
+            const center = this.map.getCenter();
+            if (
+              features.lon != center.lng || 
+              features.lat != center.lat || 
+              features.zoom != this.map.getZoom()
+            ) {
+              let position = {
+                "center": [features.lon, features.lat],
+                "zoom": features.zoom,
+                "bearing": 0,
+                "pitch": 0
+              };
+              this.map.jumpTo(position);
+            }
+          }
 
-      // todo ck if update provided AT ALL?
-      const keys = ['lon', 'lat', 'zoom'];
-      const hasAllKeys = keys.every(key => key in updates);
-      if (!hasAllKeys) {
-        // todo should other things still be updated if this fails
-        console.error('The object does not contain all of the required keys to change the map view: lon, lat, and zoom.');
-      } else {
-        const center = this.map.getCenter();
-        if (
-          updates.lon != center.lng || 
-          updates.lat != center.lat || 
-          updates.zoom != this.map.getZoom()
-        ) {
-          let position = {
-            "center": [updates.lon, updates.lat],
-            "zoom": updates.zoom,
-            "bearing": 0,
-            "pitch": 0
-          };
-          this.map.jumpTo(position);
-        }
+          if (this.projection != features.projection) {
+            this.projection = features.projection;
+            this.map.setProjection(this.projection);
+            // if (this.projection == 'globe') {
+            //   this.map.removeControl(this.navigation);
+            //   this.map.addControl(this.geocoder);
+            //   this.map.addControl(this.navigation);
+            // } else {
+            //   this.map.removeControl(this.geocoder);
+            // }
+          }
+          break;
+
+        // TOOLTIPS
+        case 'set-tooltip':
+            // Sent from En-ROADS to BC3 to synchronize the tooltip position on a map (after
+            // receiving a 'tooltip-changed' event from the other map).
+            if (!features.lat) {
+              this.tooltip.remove();
+            } else {
+              const location = [features.lon, features.lat];
+              this.tooltip.setLngLat(location);
+              this.tooltipCenter = location;
+            }
+            break;
+          
+        // MARKERS
+        case 'set-marker':
+          // Sent from En-ROADS to BC3 to set or clear the marker/pin position on a map (after
+          // the user selects a location in the search results or resets the search box).
+          console.log(typeof this.marker)
+          if (typeof this.marker === 'undefined') {
+            console.log('marker defined')
+            this.marker = new mapboxgl.Marker()
+              .setLngLat([features.lon, features.lat])
+              .addTo(this.map);
+          }
+          if (!features.lat) {
+            this.marker.remove()
+            console.log('no lat')
+          } else {
+            console.log('setting marker')
+            this.marker.setLngLat([features.lon, features.lat]);
+          }
+          break;
       }
     },
-    async getTemperatureData() {
+    async getData() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       try {
         const response = await axios.get(path);
@@ -302,46 +377,55 @@ export default {
     },
     toFahrenheit(celsius) {
       return celsius * 9 / 5;
+    },
+    setUnit(unit) {
+      unit = unit.toUpperCase();
+      if ((unit != 'F') && (unit != 'C')) {
+        // todo check this error handling
+        console.error('Temperature unit can be either C or F. Defaulting to C.');
+        unit = 'C';
+      }
+      this.unit = unit;
+      this.fillColor = [
+        'interpolate',
+        ['linear'],
+        ['get', 'temperature']
+      ];
+      if (this.unit == 'C') {
+        for (let i = 0; i < this.celsiusScale.length; i++) {
+          this.fillColor.push(...[i, this.celsiusScale[i]]);
+        }
+      } else {
+        for (let i = 0; i < this.fahrenheitScale.length; i++) {
+          this.fillColor.push(...[i*2, this.fahrenheitScale[i]]);
+        }
+      }
     }
   },
   mounted() {
     // todo handle error better here
     const tbar = this.$route.query.tbar;
     this.tbar = tbar ? tbar : 0;
+    let longitude = this.$route.query.lon
+    let latitude = this.$route.query.lat
+    this.longitude = longitude ? longitude : 0
+    this.latitude = latitude ? latitude : 0
+    let zoom = this.$route.query.zoom
+    this.zoom = zoom ? zoom : 2
+    const projection = this.$route.query.projection
+    if (projection) {
+      this.projection = projection
+    }
     const resolution = this.$route.query.resolution;
     this.resolution = resolution ? resolution : 1.5;
     const hideLegend = this.$route.query['hide-legend'];
     this.hideLegend = hideLegend ? hideLegend.toLowerCase() : false;
 
     let unit = this.$route.query.temperature_unit;
-    if (unit) {
-      unit = unit.toUpperCase();
-      if ((unit != 'F') && (unit != 'C')) {
-        console.error('Temperature unit can be either C or F.');
-      }
-    } else {
-      unit = 'C';
-    }
-    this.unit = unit;
+    unit = unit ? unit : 'C';
+    this.setUnit(unit);
 
-    this.fillColor = [
-      'interpolate',
-      ['linear'],
-      ['get', 'temperature']
-    ];
-    if (this.unit == 'C') {
-      for (let i = 0; i < this.celsiusScale.length; i++) {
-        this.fillColor.push(...[i, this.celsiusScale[i]]);
-      }
-    } else {
-      for (let i = 0; i < this.fahrenheitScale.length; i++) {
-        this.fillColor.push(...[i*2, this.fahrenheitScale[i]]);
-      }
-    }
-    
-
-    // this.start = Date.now();
-    this.getTemperatureData()
+    this.getData()
       .then(() => {
         this.initMap();
       })
@@ -352,7 +436,7 @@ export default {
       // if (event.origin !== "https://en-roads.climateinteractive.org") return;
       // if (event.origin !== "https://en-roads.dev.climateinteractive.org") return;
       console.log('received: ', event);
-      this.updateMap(event.data);
+      this.setMap(event.data);
       
     });
     

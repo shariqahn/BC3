@@ -1,0 +1,110 @@
+http://localhost:5173/temperature?tbar=2.5&temperature_unit=C&projection=equalEarth&lat=18&lon=0&zoom=0.28&bearing=0&pitch=0&hide-legend=1
+window.postMessage(, 
+            '*');
+//
+// INITIAL CONFIGURATION
+//
+
+// 'set-config'
+// Sent from En-ROADS to BC3 (once at init time, or when the active language or units is changed).
+window.postMessage({
+    "kind": "set-config",
+    "scenarioColor": "#00b6f1",
+    "tooltipText": "at this location by ${year}"
+}, '*')
+
+
+//
+// POSITION
+//
+
+// 'set-params'
+// Sent from En-ROADS to BC3 to change map temperature, projection, unit, and/or position.
+{
+  kind: 'set-params',
+  tbar: '2.3',
+  projection: 'equalEarth',
+  lat: 50,
+  lon: 50,
+  zoom: 10,
+  bearing: 0,
+  pitch: 0,
+  temperature_unit: 'F'
+}
+
+window.postMessage({
+    "kind": "set-params", 
+    "tbar": "3.3",
+    "temperature_unit": "C",
+    "projection": "equalEarth",
+    "lat": 18,
+    "lon": 0,
+    "zoom": 0.28,
+    "bearing": 0,
+    "pitch": 0
+}, '*')
+
+// 'position-changed'
+// Sent from BC3 to En-ROADS when map position has been changed by the user.
+{
+  kind: 'position-changed',
+  lat: 50,
+  lon: 50,
+  zoom: 10,
+  bearing: 0,
+  pitch: 0
+}
+
+//
+// TOOLTIPS
+//
+
+// 'set-tooltip'
+// Sent from En-ROADS to BC3 to synchronize the tooltip position on a map (after
+// receiving a 'tooltip-changed' event from the other map).
+window.postMessage({
+  kind: 'set-tooltip',
+  lat: 75,
+  lon: 75
+}, '*')
+
+
+// 'tooltip-changed'
+// Sent from BC3 to En-ROADS when the tooltip has been shown or hidden on a map.
+{
+  kind: 'tooltip-changed',
+  lat: 75,
+  lon: 75
+}
+
+//
+// MARKERS
+//
+
+// 'set-marker'
+// Sent from En-ROADS to BC3 to set or clear the marker/pin position on a map (after
+// the user selects a location in the search results or resets the search box).
+window.postMessage({
+    "kind": "set-marker",
+    "lat": 32.781338,
+    "lon": -96.79976
+}, '*')
+{
+  kind: 'set-marker',
+  lat: 75,
+  lon: 75
+}
+
+
+
+// empty tests
+window.postMessage({
+  kind: 'set-marker',
+}, '*')
+
+
+window.postMessage({
+  kind: 'set-tooltip',
+}, '*')
+
+
