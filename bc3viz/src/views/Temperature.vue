@@ -31,7 +31,7 @@ export default {
           tooltipTemplate: 'at this location by ${year}',
           // 'Temperature increase<br>at this location by 2100',
           tooltipColor: 'black',
-          marker: undefined
+          marker: null
       }
   },
   methods: {
@@ -170,21 +170,11 @@ export default {
       });
     },
     getTooltipHTML(temperature) {
-      // const year = this.year;
-//       const year = this.tooltipTemplate;
-// const codeString = `var locationString = "at this location by ${year}";`;
-// eval(codeString);
-// console.log(locationString); // Outputs: at this location by 2023
       const year = 2100;
-      // const template = `${this.tooltipTemplate}`;
       let text;
-      // const setText = `text = \"blah\";`;
-      const setText = '\`text = ${this.tooltipTemplate};\`';
-      console.log(setText);
+      const setText = 'text = \`' + this.tooltipTemplate + '\`;';
       eval(setText);
-      console.log(text);
 
-      
       return `<div id="tooltip-temperature" style="color: ${this.tooltipColor}">
                 <span style="font-size: 8vw">+${temperature}</span><span style="font-size: 3.5vw; vertical-align: 90%">&deg;${this.unit}</span>                
               </div>
@@ -206,7 +196,6 @@ export default {
         latitudeIndex = (this.tooltipCenter[1] + 89.5);
         longitudeIndex = this.tooltipCenter[0] - .5;
       }  
-      console.log(`lat i: ${latitudeIndex}`)
       let temperature = this.temperatures[latitudeIndex][longitudeIndex];
 
       if (this.unit == 'F') {
@@ -327,15 +316,14 @@ export default {
         case 'set-marker':
           // Sent from En-ROADS to BC3 to set or clear the marker/pin position on a map (after
           // the user selects a location in the search results or resets the search box).
-          console.log(typeof this.marker)
-          if (typeof this.marker === 'undefined') {
-            console.log('marker defined')
+          if (!this.marker) {
+            console.log('new marker')
             this.marker = new mapboxgl.Marker()
               .setLngLat([features.lon, features.lat])
               .addTo(this.map);
-          }
-          if (!features.lat) {
-            this.marker.remove()
+          } else if (!('lat' in features)) {
+            this.marker.remove();
+            this.marker = null;
             console.log('no lat')
           } else {
             console.log('setting marker')
