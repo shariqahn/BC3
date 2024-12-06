@@ -24,7 +24,7 @@ export default {
           loading: true,
           fillColor: [],
           resolution: undefined,
-          tooltip: undefined,
+          tooltip: null,
           geocoder: undefined,
           navigation: undefined,
           hideLegend: undefined,
@@ -149,14 +149,22 @@ export default {
         });
         // todo differentiate bw message close to prevent infiinite loop
         this.tooltip.on('close', () => {
-          console.log('popup was closed');
-          console.log({
-            "kind": 'tooltip-changed'
-          })
-          window.parent.postMessage({
-            "kind": 'tooltip-changed'
-          }, 
-          '*');
+          
+          // todo better solution
+          if (this.messageClosed){
+            this.messageClosed = false;
+          } else {
+            window.parent.postMessage({
+              "kind": 'tooltip-changed'
+            }, 
+            '*');
+            console.log('popup was closed');
+            console.log({
+              "kind": 'tooltip-changed'
+            })
+          }
+
+          
         });
       });
       
@@ -312,12 +320,21 @@ export default {
             // Sent from En-ROADS to BC3 to synchronize the tooltip position on a map (after
             // receiving a 'tooltip-changed' event from the other map).
             console.log(this.tooltip);
+            if (typeof this.tooltip == 'undefined') {
+              this.tooltip = new mapboxgl.Popup();
+            }
             if (!('lat' in features)) {
+              // Set this flag to differentiate between message close and click close
+              this.messageClosed = true;
               this.tooltip.remove();
             } else {
-              this.tooltip.setLngLat([features.lon, features.lat]);
-              const temperature = this.getTemperature(features.lon, features.lat);
-              this.tooltip.setHTML(this.getTooltipHTML(temperature));
+              this.tooltip
+                .setLngLat([features.lon, features.lat])
+                .setHTML(this.getTooltipHTML(this.getTemperature(features.lon, features.lat)))
+                .addTo(this.map);
+              // this.tooltip.setLngLat([features.lon, features.lat]);
+              // const temperature = this.getTemperature(features.lon, features.lat);
+              // this.tooltip.setHTML(this.getTooltipHTML(temperature));
             }
             break;
           
@@ -325,6 +342,7 @@ export default {
         case 'set-marker':
           // Sent from En-ROADS to BC3 to set or clear the marker/pin position on a map (after
           // the user selects a location in the search results or resets the search box).
+          // todo change this to match tooltip logic with addto
           if (!this.marker) {
             console.log('new marker')
             this.marker = new mapboxgl.Marker()
