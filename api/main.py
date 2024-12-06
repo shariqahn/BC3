@@ -64,6 +64,8 @@ def get_temperature():
 
     tbar              = float(request.args.get('tbar', 0))
     flat, flon, ftemp, _, _ = patternscaling( tbar, filename )
+    print('lat', flat)
+    print('lon', flon)
     
     return {
         "lats": flat.tolist(),

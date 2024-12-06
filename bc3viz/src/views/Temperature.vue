@@ -62,15 +62,12 @@ export default {
             "geometry": {
               "type": "Polygon",
               "coordinates": polygon
-            },
-            "properties": {
-              'center': [longitude, latitude]
             }
           }
           if (this.unit == 'C') {
-            feature.properties.temperature = temperature;
+            feature.properties = {'temperature': temperature};
           } else {
-            feature.properties.temperature = this.toFahrenheit(temperature);
+            feature.properties = {'temperature': this.toFahrenheit(temperature)};
           }
           this.data.features.push(feature)
         })
@@ -91,6 +88,7 @@ export default {
         // style: 'mapbox://styles/mapbox/light-v11', // style URL for Mapbox Light
         zoom: this.zoom,
         maxZoom: 5, // Note: Layers beyond this zoom point were removed for performance reasons ("POI", "settlement-subdivision-label", "waterway-label", "admin-1-boundary-bg"). Add them back if this parameter changes.
+        // todo change this to a not "this" var
         center: [this.longitude, this.latitude]
       });
 
@@ -128,26 +126,28 @@ export default {
 
         this.tooltip = new mapboxgl.Popup();
         this.map.on('click', 'temperature-map', (e) => {
-            this.tooltipCenter = JSON.parse(e.features[0].properties.center);
-            const temperature = this.getTemperature();
-            this.tooltip.setLngLat(e.lngLat)
+            const tooltipLatitude = e.lngLat.lat;
+            const tooltipLongitude = e.lngLat.lng;
+            const temperature = this.getTemperature(tooltipLongitude, tooltipLatitude);
+            this.tooltip
+              .setLngLat([tooltipLongitude, tooltipLatitude])
             // todo include year from enroads
               .setHTML(this.getTooltipHTML(temperature))             
               .addTo(this.map);
             console.log('popup was added');
             console.log({
               "kind": 'tooltip-changed',
-              "lat": this.tooltipCenter[1],
-              "lon": this.tooltipCenter[0]
-            })
+              "lat": tooltipLatitude,
+              "lon": tooltipLongitude
+            });
             window.parent.postMessage({
               "kind": 'tooltip-changed',
-              "lat": this.tooltipCenter[1],
-              "lon": this.tooltipCenter[0]
+              "lat": tooltipLatitude,
+              "lon": tooltipLongitude
             }, 
             '*');
         });
-
+        // todo differentiate bw message close to prevent infiinite loop
         this.tooltip.on('close', () => {
           console.log('popup was closed');
           console.log({
@@ -182,20 +182,27 @@ export default {
                 ${text}
               </div>`
     },
-    getTemperature() {
+    getTemperature(longitude, latitude) {
       // Convert center of pixel to index for temperature data
       let latitudeIndex;
       let longitudeIndex;
       if (this.resolution == 1.5) {
-        latitudeIndex = (this.tooltipCenter[1] + 89.25) / 1.5;
-        longitudeIndex = this.tooltipCenter[0] / 1.5;
-      } else if (this.resolution == 2) {
-        latitudeIndex = (this.tooltipCenter[1] + 89) / 2;
-        longitudeIndex = this.tooltipCenter[0] / 2;
-      }  else { // 1-degree
-        latitudeIndex = (this.tooltipCenter[1] + 89.5);
-        longitudeIndex = this.tooltipCenter[0] - .5;
-      }  
+        const minLatitude = -89.25;
+        let i = Math.round((latitude - minLatitude) / this.resolution);
+        // Ensure the index is within bounds
+        latitudeIndex = Math.max(0, Math.min(i, this.temperatures.length - 1));
+
+        i = Math.round((((longitude % 360) + 360) % 360) / this.resolution);
+        longitudeIndex = i % this.temperatures[0].length;
+      } 
+      // else if (this.resolution == 2) {
+      //   latitudeIndex = (location[1] + 89) / 2;
+      //   longitudeIndex = location[0] / 2;
+      // }  else { // 1-degree
+      //   latitudeIndex = location[1] + 89.5;
+      //   longitudeIndex = location[0] - .5;
+      // }  
+      // console.log(latitudeIndex, longitudeIndex);
       let temperature = this.temperatures[latitudeIndex][longitudeIndex];
 
       if (this.unit == 'F') {
@@ -254,7 +261,8 @@ export default {
                 const source = this.map.getSource('temperature');
                 source.setData(this.data);
                 if (this.tooltip.isOpen()) {
-                  const temperature = this.getTemperature();
+                  const tooltipLocation = this.tooltip.getLngLat();
+                  const temperature = this.getTemperature(tooltipLocation.lng, tooltipLocation.lat);
                   this.tooltip.setHTML(this.getTooltipHTML(temperature));
                 }
               })
@@ -303,12 +311,13 @@ export default {
         case 'set-tooltip':
             // Sent from En-ROADS to BC3 to synchronize the tooltip position on a map (after
             // receiving a 'tooltip-changed' event from the other map).
-            if (!features.lat) {
+            console.log(this.tooltip);
+            if (!('lat' in features)) {
               this.tooltip.remove();
             } else {
-              const location = [features.lon, features.lat];
-              this.tooltip.setLngLat(location);
-              this.tooltipCenter = location;
+              this.tooltip.setLngLat([features.lon, features.lat]);
+              const temperature = this.getTemperature(features.lon, features.lat);
+              this.tooltip.setHTML(this.getTooltipHTML(temperature));
             }
             break;
           
@@ -334,11 +343,11 @@ export default {
     },
     async getData() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       try {
         const response = await axios.get(path);
