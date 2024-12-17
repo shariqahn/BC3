@@ -1,6 +1,9 @@
 http://localhost:5173/temperature?tbar=2.5&temperature_unit=C&projection=equalEarth&lat=18&lon=0&zoom=0.28&bearing=0&pitch=0&hide-legend=1
-window.postMessage(, 
-            '*');
+
+// BC3 side send a message when the map is loaded
+window.postMessage({ kind: 'map-loaded' }, '*')
+
+
 //
 // INITIAL CONFIGURATION
 //
@@ -10,7 +13,7 @@ window.postMessage(,
 window.postMessage({
     "kind": "set-config",
     "scenarioColor": "#00b6f1",
-    "tooltipText": "at this location by ${year}"
+    "tooltipText": "at this location by 2100"
 }, '*')
 
 
@@ -59,6 +62,15 @@ window.postMessage({
 // TOOLTIPS
 //
 
+cases:
+- no tooltip yet, then set-tooltip
+- remove tooltip manually --> send message
+- existing tooltip, then set
+- remove tooltip from message
+  - then set manualy
+  - then set message
+- move/add tooltip manual --> send message
+
 // 'set-tooltip'
 // Sent from En-ROADS to BC3 to synchronize the tooltip position on a map (after
 // receiving a 'tooltip-changed' event from the other map).
@@ -66,6 +78,10 @@ window.postMessage({
   kind: 'set-tooltip',
   lat: 75,
   lon: 75
+}, '*')
+
+window.postMessage({
+  kind: 'set-tooltip',
 }, '*')
 
 
@@ -81,6 +97,12 @@ window.postMessage({
 // MARKERS
 //
 
+cases
+- no marker yet, then set-marker
+- existing marker, then set
+- remove marker from message
+  - then set message
+
 // 'set-marker'
 // Sent from En-ROADS to BC3 to set or clear the marker/pin position on a map (after
 // the user selects a location in the search results or resets the search box).
@@ -89,23 +111,21 @@ window.postMessage({
     "lat": 32.781338,
     "lon": -96.79976
 }, '*')
-{
+
+window.postMessage({
   kind: 'set-marker',
-  lat: 75,
-  lon: 75
-}
+  lat: 0,
+  lon: 0
+}, '*')
 
 
-
-// empty tests
+// empty test
 window.postMessage({
   kind: 'set-marker',
 }, '*')
 
 
-window.postMessage({
-  kind: 'set-tooltip',
-}, '*')
+
 
 
 lat [-89.25, -87.75, -86.25, -84.75, -83.25, -81.75, -80.25, -78.75, -77.25, -75.75, -74.25, -72.75, -71.25, -69.75, -68.25, -66.75, -65.25, -63.75, -62.25, -60.75, -59.25, -57.75, -56.25, -54.75, -53.25, -51.75, -50.25, -48.75, -47.25, -45.75, -44.25, -42.75, -41.25, -39.75, -38.25, -36.75, -35.25, -33.75, -32.25, -30.75, -29.25, -27.75, -26.25, -24.75, -23.25, -21.75, -20.25, -18.75, -17.25, -15.75, -14.25, -12.75, -11.25,  -9.75,  -8.25,  -6.75,  -5.25,  -3.75,  -2.25,  -0.75,   0.75,   2.25,   3.75,   5.25,   6.75,   8.25,   9.75,  11.25,  12.75,  14.25,  15.75,  17.25,  18.75,  20.25,  21.75,  23.25,  24.75,  26.25,  27.75,  29.25,  30.75,  32.25,  33.75,  35.25,  36.75,  38.25,  39.75,  41.25,  42.75,  44.25,  45.75,  47.25,  48.75,  50.25,  51.75,  53.25,  54.75,  56.25,  57.75,  59.25,  60.75,  62.25,  63.75,  65.25,  66.75,  68.25,  69.75,  71.25,  72.75,  74.25,  75.75,  77.25,  78.75,  80.25,  81.75,  83.25,  84.75,  86.25,  87.75,  89.25]

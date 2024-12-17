@@ -24,12 +24,11 @@ export default {
           loading: true,
           fillColor: [],
           resolution: undefined,
-          tooltip: null,
+          tooltip: undefined,
           geocoder: undefined,
           navigation: undefined,
           hideLegend: undefined,
-          tooltipTemplate: 'at this location by ${year}',
-          // 'Temperature increase<br>at this location by 2100',
+          tooltipText: 'Temperature increase<br>at this location',
           tooltipColor: 'black',
           marker: null
       }
@@ -128,11 +127,10 @@ export default {
         this.map.on('click', 'temperature-map', (e) => {
             const tooltipLatitude = e.lngLat.lat;
             const tooltipLongitude = e.lngLat.lng;
-            const temperature = this.getTemperature(tooltipLongitude, tooltipLatitude);
             this.tooltip
               .setLngLat([tooltipLongitude, tooltipLatitude])
             // todo include year from enroads
-              .setHTML(this.getTooltipHTML(temperature))             
+              .setHTML(this.getTooltipHTML())             
               .addTo(this.map);
             console.log('popup was added');
             console.log({
@@ -168,26 +166,29 @@ export default {
         });
       });
       
-      // todo is this sufficient for mobile
-      this.map.on('dragend', () => {
-        this.sendMapView();
+      // this.map.on('dragend', () => {
+      //   this.sendMapView();
+      // });
+      this.map.on('moveend', (event) => {
+        if (event.originalEvent) {
+          this.sendMapView();
+        }
       });
 
       this.map.on('idle', () => {
         this.loading = false;
+        window.parent.postMessage({ kind: 'map-loaded' }, '*');
+        console.log('map loaded');
       });
     },
-    getTooltipHTML(temperature) {
-      const year = 2100;
-      let text;
-      const setText = 'text = \`' + this.tooltipTemplate + '\`;';
-      eval(setText);
-
+    getTooltipHTML() {
+      const tooltipLocation = this.tooltip.getLngLat();
+      const temperature = this.getTemperature(tooltipLocation.lng, tooltipLocation.lat);
       return `<div id="tooltip-temperature" style="color: ${this.tooltipColor}">
                 <span style="font-size: 8vw">+${temperature}</span><span style="font-size: 3.5vw; vertical-align: 90%">&deg;${this.unit}</span>                
               </div>
               <div style="font-size: 2.5vw; font-weight: bold; white-space: nowrap">
-                ${text}
+                ${this.tooltipText}
               </div>`
     },
     getTemperature(longitude, latitude) {
@@ -247,7 +248,10 @@ export default {
       switch (messageType) {
         case 'set-config':
           this.tooltipColor = features.scenarioColor;
-          this.tooltipTemplate = features.tooltipText;
+          this.tooltipText = features.tooltipText;
+          if (this.tooltip.isOpen()) {
+            this.tooltip.setHTML(this.getTooltipHTML());
+          }
           break;
         case 'set-params':
           // Sent from En-ROADS to BC3 to change map temperature, projection, and/or position.
@@ -268,9 +272,7 @@ export default {
                 const source = this.map.getSource('temperature');
                 source.setData(this.data);
                 if (this.tooltip.isOpen()) {
-                  const tooltipLocation = this.tooltip.getLngLat();
-                  const temperature = this.getTemperature(tooltipLocation.lng, tooltipLocation.lat);
-                  this.tooltip.setHTML(this.getTooltipHTML(temperature));
+                  this.tooltip.setHTML(this.getTooltipHTML());
                 }
               })
               .catch(error => {
@@ -318,22 +320,20 @@ export default {
         case 'set-tooltip':
             // Sent from En-ROADS to BC3 to synchronize the tooltip position on a map (after
             // receiving a 'tooltip-changed' event from the other map).
-            console.log(this.tooltip);
-            if (typeof this.tooltip == 'undefined') {
-              this.tooltip = new mapboxgl.Popup();
-            }
+            console.log('set tooltip', this.tooltip);
             if (!('lat' in features)) {
               // Set this flag to differentiate between message close and click close
               this.messageClosed = true;
               this.tooltip.remove();
             } else {
+              console.log('setting tooltip');
               this.tooltip
                 .setLngLat([features.lon, features.lat])
-                .setHTML(this.getTooltipHTML(this.getTemperature(features.lon, features.lat)))
-                .addTo(this.map);
-              // this.tooltip.setLngLat([features.lon, features.lat]);
-              // const temperature = this.getTemperature(features.lon, features.lat);
-              // this.tooltip.setHTML(this.getTooltipHTML(temperature));
+                .setHTML(this.getTooltipHTML());
+                if (!this.tooltip.isOpen()) {
+                  console.log('tooltip not open, so addign it');
+                  this.tooltip.addTo(this.map);
+                }
             }
             break;
           
