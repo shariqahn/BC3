@@ -321,7 +321,7 @@ export default {
             // Sent from En-ROADS to BC3 to synchronize the tooltip position on a map (after
             // receiving a 'tooltip-changed' event from the other map).
             console.log('set tooltip', this.tooltip);
-            if (!('lat' in features)) {
+            if ((features.lat === undefined) || !('lat' in features)) {
               // Set this flag to differentiate between message close and click close
               this.messageClosed = true;
               this.tooltip.remove();
@@ -347,7 +347,7 @@ export default {
             this.marker = new mapboxgl.Marker()
               .setLngLat([features.lon, features.lat])
               .addTo(this.map);
-          } else if (!('lat' in features)) {
+          } else if ((features.lat === undefined) || !('lat' in features)) {
             this.marker.remove();
             this.marker = null;
             console.log('no lat')
@@ -361,7 +361,6 @@ export default {
     async getData() {
       let url = window.location.origin
       const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
-      console.log('testing branch !!')
 
       // for local testing
       // url = url.slice(0, url.lastIndexOf(":"))

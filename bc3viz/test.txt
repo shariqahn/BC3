@@ -49,6 +49,8 @@ window.postMessage({
 
 // 'position-changed'
 // Sent from BC3 to En-ROADS when map position has been changed by the user.
+
+// make sure only sent for manual changes
 {
   kind: 'position-changed',
   lat: 50,
@@ -92,6 +94,9 @@ window.postMessage({
   lat: 75,
   lon: 75
 }
+
+==> En-ROADS received "tooltip-changed" message from BC3 "current" map iframe: {"kind":"tooltip-changed","lat":31.481262600148455,"lon":-96.2246566971671} scenario-CJL6Pph_.js:21:119356
+==> En-ROADS sending "set-tooltip" message to BC3 "baseline" map iframe: {"kind":"set-tooltip","lat":31.481262600148455,"lon":-96.2246566971671}
 
 //
 // MARKERS
