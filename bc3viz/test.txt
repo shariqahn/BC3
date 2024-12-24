@@ -1,5 +1,5 @@
 to fix
-- map-loaded sent when tooltip created by click
+- position-changed message sent upon init - maybe thats necessary actually?
 
 http://localhost:5173/temperature?tbar=2.5&temperature_unit=C&projection=equalEarth&lat=18&lon=0&zoom=0.28&bearing=0&pitch=0&hide-legend=1
 

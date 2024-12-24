@@ -16,6 +16,7 @@
     "chroma-js": "^2.4.2",
     "d3-color-legend": "^1.4.1",
     "mapbox-gl": "^3.1.2",
+    "nanoid": "^5.0.9",
     "vue": "^3.3.11",
     "vue-router": "^4.2.5"
   },
