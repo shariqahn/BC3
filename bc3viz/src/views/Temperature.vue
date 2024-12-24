@@ -129,15 +129,8 @@ export default {
             const tooltipLongitude = e.lngLat.lng;
             this.tooltip
               .setLngLat([tooltipLongitude, tooltipLatitude])
-            // todo include year from enroads
               .setHTML(this.getTooltipHTML())             
               .addTo(this.map);
-            console.log('popup was added');
-            console.log({
-              "kind": 'tooltip-changed',
-              "lat": tooltipLatitude,
-              "lon": tooltipLongitude
-            });
             window.parent.postMessage({
               "kind": 'tooltip-changed',
               "lat": tooltipLatitude,
@@ -145,7 +138,6 @@ export default {
             }, 
             '*');
         });
-        // todo differentiate bw message close to prevent infiinite loop
         this.tooltip.on('close', () => {
           
           // todo better solution
@@ -156,10 +148,6 @@ export default {
               "kind": 'tooltip-changed'
             }, 
             '*');
-            console.log('popup was closed');
-            console.log({
-              "kind": 'tooltip-changed'
-            })
           }
 
           
@@ -178,7 +166,6 @@ export default {
       this.map.on('idle', () => {
         if (this.loading) {
           window.parent.postMessage({ kind: 'map-loaded' }, '*');
-          console.log('map loaded');
         }
         this.loading = false;
       });
@@ -230,13 +217,6 @@ export default {
     },
     sendMapView() {
       const center = this.map.getCenter();
-        console.log('map changed. notifying en-roads:');
-        console.log({
-          "kind": 'position-changed',
-          "lat": center.lat,
-          "lon": center.lng,
-          "zoom": this.map.getZoom(),
-        });
         window.parent.postMessage({
           "kind": 'position-changed',
           "lat": center.lat,
@@ -263,14 +243,12 @@ export default {
             updateTooltip = true;
           }
           if (this.tbar != features.tbar) {
-            console.log('termperatue changed');
             this.tbar = features.tbar;
             updateTooltip = true;
           }
           if (updateTooltip) {
             this.getData()
               .then(() => {
-                console.log('updating temp');
                 const source = this.map.getSource('temperature');
                 source.setData(this.data);
                 if (this.tooltip.isOpen()) {
@@ -322,18 +300,15 @@ export default {
         case 'set-tooltip':
             // Sent from En-ROADS to BC3 to synchronize the tooltip position on a map (after
             // receiving a 'tooltip-changed' event from the other map).
-            console.log('set tooltip', this.tooltip);
             if (isNaN(features.lat) || !('lat' in features)) {
               // Set this flag to differentiate between message close and click close
               this.messageClosed = true;
               this.tooltip.remove();
             } else {
-              console.log('setting tooltip');
               this.tooltip
                 .setLngLat([features.lon, features.lat])
                 .setHTML(this.getTooltipHTML());
                 if (!this.tooltip.isOpen()) {
-                  console.log('tooltip not open, so addign it');
                   this.tooltip.addTo(this.map);
                 }
             }
@@ -345,16 +320,13 @@ export default {
           // the user selects a location in the search results or resets the search box).
           // todo change this to match tooltip logic with addto
           if (!this.marker) {
-            console.log('new marker')
             this.marker = new mapboxgl.Marker()
               .setLngLat([features.lon, features.lat])
               .addTo(this.map);
           } else if (isNaN(features.lat) || !('lat' in features)) {
             this.marker.remove();
             this.marker = null;
-            console.log('no lat')
           } else {
-            console.log('setting marker')
             this.marker.setLngLat([features.lon, features.lat]);
           }
           break;
@@ -451,7 +423,7 @@ export default {
     window.addEventListener("message", (event) => {
       // if (event.origin !== "https://en-roads.climateinteractive.org") return;
       // if (event.origin !== "https://en-roads.dev.climateinteractive.org") return;
-      console.log('received: ', event);
+      // console.log('received: ', event);
       this.setMap(event.data);
       
     });
