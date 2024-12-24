@@ -1,3 +1,6 @@
+to fix
+- map-loaded sent when tooltip created by click
+
 http://localhost:5173/temperature?tbar=2.5&temperature_unit=C&projection=equalEarth&lat=18&lon=0&zoom=0.28&bearing=0&pitch=0&hide-legend=1
 
 // BC3 side send a message when the map is loaded
@@ -86,6 +89,11 @@ window.postMessage({
   kind: 'set-tooltip',
 }, '*')
 
+window.postMessage({
+  kind: 'set-tooltip',
+  lat: undefined,
+  lon: undefined
+}, '*')
 
 // 'tooltip-changed'
 // Sent from BC3 to En-ROADS when the tooltip has been shown or hidden on a map.
