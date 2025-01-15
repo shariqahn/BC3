@@ -169,6 +169,15 @@ export default {
         }
         this.loading = false;
       });
+
+      // XXX: Set top padding so that tooltip is not obscured by the Baseline/Current Scenario box
+      this.map.setPadding({ top: 85 })
+
+      // XXX: Enable this temporarily to help visualize the padding values
+      this.map.showPadding = true
+
+      // // XXX: Add a custom tooltip for easier testing
+      // new mapboxgl.Popup().setLngLat(center).setHTML('Hello!!').addTo(this.map)
     },
     getTooltipHTML() {
       const tooltipLocation = this.tooltip.getLngLat();
