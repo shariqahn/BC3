@@ -28,7 +28,7 @@ export default {
           geocoder: undefined,
           navigation: undefined,
           hideLegend: undefined,
-          tooltipText: 'Temperature increase<br>at this location',
+          tooltipText: 'by 2100',
           tooltipColor: 'black',
           marker: null
       }
@@ -129,7 +129,7 @@ export default {
             const tooltipLongitude = e.lngLat.lng;
             this.tooltip
               .setLngLat([tooltipLongitude, tooltipLatitude])
-              .setHTML(this.getTooltipHTML())             
+              .setHTML(this.getTooltipHTML())
               .addTo(this.map);
             window.parent.postMessage({
               "kind": 'tooltip-changed',
@@ -182,10 +182,10 @@ export default {
     getTooltipHTML() {
       const tooltipLocation = this.tooltip.getLngLat();
       const temperature = this.getTemperature(tooltipLocation.lng, tooltipLocation.lat);
-      return `<div id="tooltip-temperature" style="color: ${this.tooltipColor}">
-                <span style="font-size: 8vw">+${temperature}</span><span style="font-size: 3.5vw; vertical-align: 90%">&deg;${this.unit}</span>                
+      return `<div id="tooltip-temperature" style="color: ${this.tooltipColor}; letter-spacing: -3px; padding-top: 0px">
+                <span style="font-size: 9vh">+${temperature}</span><span style="font-size: 3.25vh; vertical-align: 125%; letter-spacing: -2px">&deg;${this.unit}</span>                
               </div>
-              <div style="font-size: 2.5vw; font-weight: bold; white-space: nowrap">
+              <div style="font-size: 3vh; font-weight: bold; white-space: nowrap">
                 ${this.tooltipText}
               </div>`
     },
