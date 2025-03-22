@@ -182,10 +182,10 @@ export default {
     getTooltipHTML() {
       const tooltipLocation = this.tooltip.getLngLat();
       const temperature = this.getTemperature(tooltipLocation.lng, tooltipLocation.lat);
-      return `<div id="tooltip-temperature" style="color: ${this.tooltipColor}; letter-spacing: -3px; padding-top: 0px">
-                <span style="font-size: 9vh">+${temperature}</span><span style="font-size: 3.25vh; vertical-align: 125%; letter-spacing: -2px">&deg;${this.unit}</span>                
+      return `<div id="tooltip-temperature" style="color: ${this.tooltipColor}; letter-spacing: -2px; padding-top: 0px; padding-bottom: 1vh;">
+                <span style="font-size: 13vh">+${temperature}</span><span style="font-size: 5vh; vertical-align: 120%; letter-spacing: -1px">&deg;${this.unit}</span>                
               </div>
-              <div style="font-size: 3vh; font-weight: bold; white-space: nowrap">
+              <div style="font-size: 4vh; font-weight: bold; white-space: nowrap">
                 ${this.tooltipText}
               </div>`
     },
