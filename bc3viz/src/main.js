@@ -23,7 +23,9 @@ mapboxgl.Popup.prototype._getAnchor = function (bottomY) {
     if (!map || !container || !pos) return 'bottom'
   
     const width = container.offsetWidth
-    const height = container.offsetHeight
+    // const height = container.offsetHeight
+    const tipHeight = getComputedStyle(document.querySelector('.mapboxgl-popup-tip')).borderTopWidth;
+    const height = parseInt(tipHeight, 10) + container.offsetHeight;
   
     // XXX: The following change is based on a draft PR that takes map padding
     // into account when positioning the Popup:

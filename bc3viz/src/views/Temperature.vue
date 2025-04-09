@@ -175,9 +175,6 @@ export default {
 
       // XXX: Enable this temporarily to help visualize the padding values
       // this.map.showPadding = true
-
-      // // XXX: Add a custom tooltip for easier testing
-      // new mapboxgl.Popup().setLngLat(center).setHTML('Hello!!').addTo(this.map)
     },
     getTooltipHTML() {
       const tooltipLocation = this.tooltip.getLngLat();
