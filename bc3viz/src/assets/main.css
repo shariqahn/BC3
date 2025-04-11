@@ -64,8 +64,3 @@ a,
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
-#tooltip-temperature {
-  font-size: 56px;
-  padding-top: .5vw;
-}

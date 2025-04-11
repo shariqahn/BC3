@@ -7,19 +7,25 @@
 .mapboxgl-popup-content {
   text-align: center;
   padding-top: 0px;
-  padding-right: 2vw;
+  /* padding-right: 2vw; */
+  padding-right: 3vw;
   padding-left: 2vw;
-  padding-bottom: 1vh;
+  /* padding-bottom: 1vh; */
+  padding-bottom: .6vw;
   width: max-content;
   border-radius: 6px;
-  line-height: .9
+  line-height: .9;
+  user-select: none;
 ;}
 
 .mapboxgl-popup-close-button {
-  font-size: 4vh;
+  /* font-size: 4vh; */
+  font-size: 2.5vw;
+  font-weight: bold;
   line-height: .7;
   color: gray;
-  padding-bottom: 1vh;
+  /* padding-bottom: 1vh; */
+  padding-bottom: .5vw;
   padding-top: 0%;
   border-radius: 0 6px 0 0;
 }
@@ -81,3 +87,12 @@
   border-bottom-width: 30px;
 }
 
+#tooltip-temperature {
+  /* font-size: 56px; */
+  letter-spacing: -2px; 
+  /* padding-top: 0px; 
+  padding-bottom: 1vh; */
+  /* todo change to vw */
+  padding-top: .5vw;
+  padding-bottom: .4vw;
+}
