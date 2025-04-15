@@ -1,3 +1,7 @@
+window.postMessage({"kind":"set-params","tbar":"2.6","temperature_unit":"C","projection":"equalEarth","lat":9.7325494545104,"lon":-22.01252366905817,"zoom":1.2603663900492204,"bearing":0,"pitch":0}, '*')
+
+
+
 to fix
 - position-changed message sent upon init - maybe thats necessary actually?
 

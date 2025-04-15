@@ -180,9 +180,9 @@ export default {
       const tooltipLocation = this.tooltip.getLngLat();
       const temperature = this.getTemperature(tooltipLocation.lng, tooltipLocation.lat);
       return `<div id="tooltip-temperature" style="color: ${this.tooltipColor};">
-                <span style="font-size: 7vw; line-height: .9">+${temperature}</span><span style="font-size: 3vw; vertical-align: 100%; letter-spacing: -1px">&deg;${this.unit}</span>                
+                <span id="temperature-value">+${temperature}</span><span id="temperature-unit">&deg;${this.unit}</span>                
               </div>
-              <div style="font-size: 2.2vw; font-weight: bold; white-space: nowrap; padding-bottom: .2vw;">
+              <div id=tooltip-text>
                 ${this.tooltipText}
               </div>`
     },
