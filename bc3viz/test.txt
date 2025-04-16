@@ -1,4 +1,4 @@
-window.postMessage({"kind":"set-params","tbar":"2.6","temperature_unit":"C","projection":"equalEarth","lat":9.7325494545104,"lon":-22.01252366905817,"zoom":1.2603663900492204,"bearing":0,"pitch":0}, '*')
+window.postMessage({"kind":"set-params","tbar":"2.6","temperature_unit":"C","projection":"equalEarth","lat":9.7325494545104,"lon":-22.01252366905817,"zoom":3.2603663900492204,"bearing":0,"pitch":0}, '*')
 
 
 
