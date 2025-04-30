@@ -1,1 +1,1 @@
-We have created a visualization of temperature projections using pattern scaling. See a demo of this work we did in collaboration with En-ROADS [here.](https://bc3.mit.edu/demos/en-roads/)
+I have created a visualization of temperature projections using pattern scaling as a part of MIT's [Bringing Computation to the Climate Challenge](https://bc3.mit.edu/). See a demo of this work we did in collaboration with En-ROADS [here](https://bc3.mit.edu/demos/en-roads/).
