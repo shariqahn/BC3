@@ -340,11 +340,11 @@ export default {
     },
     async getData() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       try {
         const response = await axios.get(path);
