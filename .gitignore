@@ -6,3 +6,4 @@ api/psenv
 grr.html
 test-iframe.html
 bc3viz/.env
+.DS_Store
