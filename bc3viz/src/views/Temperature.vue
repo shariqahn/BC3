@@ -79,12 +79,10 @@ export default {
       this.map = new mapboxgl.Map({
         container: 'map', 
         projection: this.projection,
-        // style: 'mapbox://styles/mapbox/streets-v8', 
         // style: 'mapbox://styles/shariqah/clz1y4dvk02ae01p9697g9k2o/draft', // using coastline data is ~9s as opposed to mapbox countires data (~6s)
-        style: 'mapbox://styles/shariqah/clzfw8mfr00cj01qp3qmc1ypy/draft', // takes about 1.2s to render without coastline; 1.4 with
-        // style: 'mapbox://styles/mapbox/streets-v12?optimize=true', // takes about 2s to render without coastline; 2.4 wiht
+        // style: 'mapbox://styles/shariqah/clzfw8mfr00cj01qp3qmc1ypy/draft', // takes about 1.2s to render without coastline; 1.4 with
+        style: 'mapbox://styles/shariqah/cmeu5ty1x003p01qr7cuyh214', // thicker lines for demo
         // ?optimize=true', //adding optimize=true didnt seem to hlep anything
-        // style: 'mapbox://styles/mapbox/light-v11', // style URL for Mapbox Light
         zoom: this.zoom,
         maxZoom: 5, // Note: Layers beyond this zoom point were removed for performance reasons ("POI", "settlement-subdivision-label", "waterway-label", "admin-1-boundary-bg"). Add them back if this parameter changes.
         // todo change this to a not "this" var
@@ -340,11 +338,12 @@ export default {
     },
     async getData() {
       let url = window.location.origin
-      const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      // const path = url + '/api/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
 
       // for local testing
-      // url = url.slice(0, url.lastIndexOf(":"))
-      // const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      url = url.slice(0, url.lastIndexOf(":"))
+      const path = url + ':5002/temperature?tbar=' + this.tbar + '&resolution=' + this.resolution;
+      console.log(path)
 
       try {
         const response = await axios.get(path);
